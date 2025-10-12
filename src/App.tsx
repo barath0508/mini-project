@@ -6,7 +6,7 @@ import SensorCard from './components/SensorCard';
 import AlertBanner from './components/AlertBanner';
 import LoadingSpinner from './components/LoadingSpinner';
 
-const MQTT_BROKER = import.meta.env.VITE_MQTT_BROKER || 'ws://10.68.146.126:9001';
+const MQTT_BROKER = import.meta.env.VITE_MQTT_BROKER || 'wss://bf0c2aed638d4a048ca7768d70b23253.s1.eu.hivemq.cloud:8884/mqtt';
 const MQTT_TOPIC = import.meta.env.VITE_MQTT_TOPIC || 'tinyml/anomaly';
 
 interface SensorData {
@@ -19,7 +19,7 @@ interface SensorData {
 }
 
 function App() {
-  const [connected, setConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'error'>('disconnected');
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
   const [history, setHistory] = useState<SensorData[]>(() => {
     const saved = localStorage.getItem('sensorHistory');
@@ -31,21 +31,31 @@ function App() {
     return parseInt(localStorage.getItem('totalAnomalies') || '0');
   });
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
+  const [connectionTime, setConnectionTime] = useState<Date | null>(null);
+  const [espStatus, setEspStatus] = useState<'online' | 'offline' | 'unknown'>('unknown');
   const clientRef = useRef<mqtt.MqttClient | null>(null);
+  const espTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    setConnectionStatus('connecting');
+    
     const client = mqtt.connect(MQTT_BROKER, {
       clientId: `mqtt_dashboard_${Math.random().toString(16).slice(3)}`,
       clean: true,
       reconnectPeriod: 5000,
+      connectTimeout: 10000,
     });
 
     client.on('connect', () => {
       console.log('Connected to MQTT broker');
-      setConnected(true);
+      setConnectionStatus('connected');
+      setConnectionTime(new Date());
+      setReconnectAttempts(0);
       client.subscribe(MQTT_TOPIC, (err) => {
         if (err) {
           console.error('Subscription error:', err);
+          setConnectionStatus('error');
         } else {
           console.log(`Subscribed to ${MQTT_TOPIC}`);
         }
@@ -54,12 +64,24 @@ function App() {
 
     client.on('disconnect', () => {
       console.log('Disconnected from MQTT broker');
-      setConnected(false);
+      setConnectionStatus('disconnected');
+      setConnectionTime(null);
+    });
+
+    client.on('reconnect', () => {
+      console.log('Attempting to reconnect...');
+      setConnectionStatus('reconnecting');
+      setReconnectAttempts(prev => prev + 1);
     });
 
     client.on('error', (err) => {
       console.error('MQTT error:', err);
-      setConnected(false);
+      setConnectionStatus('error');
+    });
+
+    client.on('offline', () => {
+      console.log('Client went offline');
+      setConnectionStatus('disconnected');
     });
 
     client.on('message', (topic, message) => {
@@ -106,6 +128,15 @@ function App() {
 
         setSensorData(newData);
         setLastUpdate(new Date());
+        setEspStatus('online');
+        
+        // Reset ESP timeout
+        if (espTimeoutRef.current) {
+          clearTimeout(espTimeoutRef.current);
+        }
+        espTimeoutRef.current = setTimeout(() => {
+          setEspStatus('offline');
+        }, 15000); // 15 seconds timeout
         
         const newHistory = [...history.slice(-99), newData];
         setHistory(newHistory);
@@ -214,10 +245,34 @@ function App() {
               </button>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/50 backdrop-blur transition-all duration-300">
-              {connected ? (
+              {connectionStatus === 'connected' ? (
                 <>
-                  <Wifi className="text-green-400 transition-colors duration-300" size={20} />
+                  <div className="relative">
+                    <Wifi className="text-green-400 transition-colors duration-300" size={20} />
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
                   <span className="text-green-400 font-medium transition-colors duration-300">Connected</span>
+                </>
+              ) : connectionStatus === 'connecting' ? (
+                <>
+                  <div className="animate-spin">
+                    <Wifi className="text-yellow-400 transition-colors duration-300" size={20} />
+                  </div>
+                  <span className="text-yellow-400 font-medium transition-colors duration-300">Connecting...</span>
+                </>
+              ) : connectionStatus === 'reconnecting' ? (
+                <>
+                  <div className="animate-pulse">
+                    <WifiOff className="text-orange-400 transition-colors duration-300" size={20} />
+                  </div>
+                  <span className="text-orange-400 font-medium transition-colors duration-300">
+                    Reconnecting ({reconnectAttempts})
+                  </span>
+                </>
+              ) : connectionStatus === 'error' ? (
+                <>
+                  <WifiOff className="text-red-500 transition-colors duration-300" size={20} />
+                  <span className="text-red-500 font-medium transition-colors duration-300">Error</span>
                 </>
               ) : (
                 <>
@@ -317,15 +372,24 @@ function App() {
               </div>
             ) : (
               <div className="text-center py-8">
-                {connected ? (
+                {connectionStatus === 'connected' ? (
                   <div>
                     <LoadingSpinner />
                     <p className="text-gray-400 mt-4">Waiting for sensor data...</p>
                   </div>
+                ) : connectionStatus === 'connecting' || connectionStatus === 'reconnecting' ? (
+                  <div>
+                    <LoadingSpinner />
+                    <p className="text-gray-400 mt-4">
+                      {connectionStatus === 'connecting' ? 'Connecting to broker...' : `Reconnecting... (Attempt ${reconnectAttempts})`}
+                    </p>
+                  </div>
                 ) : (
                   <div>
                     <WifiOff className="mx-auto text-gray-500 mb-4" size={48} />
-                    <p className="text-gray-400">Connect to MQTT broker to view statistics</p>
+                    <p className="text-gray-400">
+                      {connectionStatus === 'error' ? 'Connection failed' : 'Connect to MQTT broker to view statistics'}
+                    </p>
                   </div>
                 )}
               </div>
@@ -346,11 +410,55 @@ function App() {
                 <span className="text-gray-300 font-mono">{MQTT_TOPIC}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Status:</span>
-                <span className={`font-medium ${connected ? 'text-green-400' : 'text-red-400'}`}>
-                  {connected ? 'Active' : 'Disconnected'}
+                <span className="text-gray-500">Broker:</span>
+                <span className={`font-medium ${
+                  connectionStatus === 'connected' ? 'text-green-400' :
+                  connectionStatus === 'connecting' ? 'text-yellow-400' :
+                  connectionStatus === 'reconnecting' ? 'text-orange-400' :
+                  connectionStatus === 'error' ? 'text-red-500' : 'text-red-400'
+                }`}>
+                  {connectionStatus === 'connected' ? 'Connected' :
+                   connectionStatus === 'connecting' ? 'Connecting' :
+                   connectionStatus === 'reconnecting' ? `Reconnecting (${reconnectAttempts})` :
+                   connectionStatus === 'error' ? 'Error' : 'Disconnected'}
                 </span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">ESP Device:</span>
+                <span className={`font-medium flex items-center gap-1 ${
+                  espStatus === 'online' ? 'text-green-400' :
+                  espStatus === 'offline' ? 'text-red-400' : 'text-gray-400'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    espStatus === 'online' ? 'bg-green-400 animate-pulse' :
+                    espStatus === 'offline' ? 'bg-red-400' : 'bg-gray-400'
+                  }`}></div>
+                  {espStatus === 'online' ? 'Online' :
+                   espStatus === 'offline' ? 'Offline' : 'Unknown'}
+                </span>
+              </div>
+              {lastUpdate && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Last Data:</span>
+                  <span className="text-gray-300 text-xs">
+                    {lastUpdate.toLocaleTimeString()}
+                  </span>
+                </div>
+              )}
+              {connectionTime && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Connected Since:</span>
+                  <span className="text-gray-300 text-xs">
+                    {connectionTime.toLocaleTimeString()}
+                  </span>
+                </div>
+              )}
+              {reconnectAttempts > 0 && connectionStatus !== 'connected' && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Reconnect Attempts:</span>
+                  <span className="text-orange-400">{reconnectAttempts}</span>
+                </div>
+              )}
             </div>
           </div>
           
