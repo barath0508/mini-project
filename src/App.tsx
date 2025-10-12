@@ -45,6 +45,8 @@ function App() {
       clean: true,
       reconnectPeriod: 5000,
       connectTimeout: 10000,
+      username: import.meta.env.VITE_MQTT_USERNAME || '',
+      password: import.meta.env.VITE_MQTT_PASSWORD || '',
     });
 
     client.on('connect', () => {
