@@ -1,498 +1,743 @@
-import { useEffect, useState, useRef } from 'react';
-import mqtt from 'mqtt';
-import { Activity, Flame, Droplets, Thermometer, Wifi, WifiOff, Download, Trash2, BarChart3, Clock, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { User, SensorData, Alert, IncidentReport } from './types';
+import Login from './components/Login';
+import FloorTabs from './components/FloorTabs';
+import RealTimeDashboard from './components/RealTimeDashboard';
+import ControlPanel from './components/ControlPanel';
+import AIPanel from './components/AIPanel';
+import Heatmap from './components/Heatmap';
+import Factory3D from './components/Factory3D';
 import SensorChart from './components/SensorChart';
-import SensorCard from './components/SensorCard';
-import AlertBanner from './components/AlertBanner';
-import LoadingSpinner from './components/LoadingSpinner';
-
-const MQTT_BROKER = import.meta.env.VITE_MQTT_BROKER || 'wss://bf0c2aed638d4a048ca7768d70b23253.s1.eu.hivemq.cloud:8884/mqtt';
-const MQTT_TOPIC = import.meta.env.VITE_MQTT_TOPIC || 'tinyml/anomaly';
-
-interface SensorData {
-  gas: number;
-  flame: number;
-  temperature: number;
-  humidity: number;
-  prediction: number;
-  timestamp: number;
-}
+import EmergencyEvacuation from './components/EmergencyEvacuation';
+import IncidentReporting from './components/IncidentReporting';
+import { MQTTService } from './services/mqttService';
+import { Shield, LogOut, Menu, X, Wifi, WifiOff, Settings, Building, Map, Bot, AlertTriangle, Phone, Bell, Download, Users, Mic, Search, Activity } from 'lucide-react';
 
 function App() {
-  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'error'>('disconnected');
-  const [sensorData, setSensorData] = useState<SensorData | null>(null);
-  const [history, setHistory] = useState<SensorData[]>(() => {
-    const saved = localStorage.getItem('sensorHistory');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [anomalyDetected, setAnomalyDetected] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [totalAnomalies, setTotalAnomalies] = useState(() => {
-    return parseInt(localStorage.getItem('totalAnomalies') || '0');
-  });
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const [reconnectAttempts, setReconnectAttempts] = useState(0);
-  const [connectionTime, setConnectionTime] = useState<Date | null>(null);
-  const [espStatus, setEspStatus] = useState<'online' | 'offline' | 'unknown'>('unknown');
-  const clientRef = useRef<mqtt.MqttClient | null>(null);
-  const espTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [activeFloor, setActiveFloor] = useState('Floor 1');
+  const [emergencyMode, setEmergencyMode] = useState(false);
+  const [sensors, setSensors] = useState<SensorData[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [incidents, setIncidents] = useState<IncidentReport[]>([]);
+  const [showAIPanel, setShowAIPanel] = useState(false);
+  const [aiPanelTab, setAIPanelTab] = useState<'voice' | 'search' | 'chat'>('chat');
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [activeView, setActiveView] = useState<'dashboard' | 'heatmap' | '3d' | 'chart'>('dashboard');
+  const [mqttConnected, setMqttConnected] = useState(false);
+  const [mqttService] = useState(() => new MQTTService());
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showAlertsModal, setShowAlertsModal] = useState(false);
+  const [showUsersModal, setShowUsersModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+
+  // Real-time MQTT data connection
+
 
   useEffect(() => {
-    setConnectionStatus('connecting');
-    
-    const client = mqtt.connect(MQTT_BROKER, {
-      clientId: `mqtt_dashboard_${Math.random().toString(16).slice(3)}`,
-      clean: true,
-      reconnectPeriod: 5000,
-      connectTimeout: 10000,
-      username: import.meta.env.VITE_MQTT_USERNAME || '',
-      password: import.meta.env.VITE_MQTT_PASSWORD || '',
-    });
-
-    client.on('connect', () => {
-      console.log('Connected to MQTT broker');
-      setConnectionStatus('connected');
-      setConnectionTime(new Date());
-      setReconnectAttempts(0);
-      client.subscribe(MQTT_TOPIC, (err) => {
-        if (err) {
-          console.error('Subscription error:', err);
-          setConnectionStatus('error');
-        } else {
-          console.log(`Subscribed to ${MQTT_TOPIC}`);
-        }
-      });
-    });
-
-    client.on('disconnect', () => {
-      console.log('Disconnected from MQTT broker');
-      setConnectionStatus('disconnected');
-      setConnectionTime(null);
-    });
-
-    client.on('reconnect', () => {
-      console.log('Attempting to reconnect...');
-      setConnectionStatus('reconnecting');
-      setReconnectAttempts(prev => prev + 1);
-    });
-
-    client.on('error', (err) => {
-      console.error('MQTT error:', err);
-      setConnectionStatus('error');
-    });
-
-    client.on('offline', () => {
-      console.log('Client went offline');
-      setConnectionStatus('disconnected');
-    });
-
-    client.on('message', (topic, message) => {
-      try {
-        const messageStr = message.toString();
-        let data: any;
-
-        // Try to parse as JSON first
-        try {
-          data = JSON.parse(messageStr);
-        } catch {
-          // Parse format: "Node1 | Anomaly detected! Gas:93 Flame:0 Temp:32 Hum:52"
-          const gasMatch = messageStr.match(/Gas:(\d+)/);
-          const flameMatch = messageStr.match(/Flame:(\d+)/);
-          const tempMatch = messageStr.match(/Temp:(\d+)/);
-          const humMatch = messageStr.match(/Hum:(\d+)/);
+    if (user) {
+      mqttService.connect(
+        (newSensorData: SensorData) => {
+          setSensors(prev => {
+            const updated = prev.filter(s => s.id !== newSensorData.id);
+            return [...updated, newSensorData];
+          });
           
-          console.log('Parsing message:', messageStr);
-          console.log('Matches:', { gasMatch, flameMatch, tempMatch, humMatch });
-          
-          if (gasMatch && flameMatch && tempMatch && humMatch) {
-            data = {
-              gas: parseInt(gasMatch[1]),
-              flame: parseInt(flameMatch[1]),
-              temperature: parseInt(tempMatch[1]),
-              humidity: parseInt(humMatch[1]),
-              prediction: messageStr.includes('Anomaly detected!') ? 1 : 0
+          // Generate alerts for critical conditions
+          if (newSensorData.status === 'critical') {
+            const newAlert: Alert = {
+              id: Date.now().toString(),
+              type: newSensorData.flame > 0 ? 'fire' : newSensorData.gas > 90 ? 'gas' : 'temperature',
+              message: `Critical alert in ${newSensorData.floor} ${newSensorData.zone}: ${newSensorData.flame > 0 ? 'Fire detected!' : newSensorData.gas > 90 ? `High gas level: ${newSensorData.gas}ppm` : `High temperature: ${newSensorData.temperature}°C`}`,
+              severity: 'high',
+              location: `${newSensorData.floor} - ${newSensorData.zone}`,
+              timestamp: newSensorData.timestamp,
+              acknowledged: false
             };
-            console.log('Parsed data:', data);
-          } else {
-            console.warn('Unknown message format:', messageStr);
-            return;
+            setAlerts(prev => [newAlert, ...prev.slice(0, 9)]);
           }
+        },
+        (connected: boolean) => {
+          setMqttConnected(connected);
         }
-
-        const newData: SensorData = {
-          gas: data.gas || 0,
-          flame: data.flame || 0,
-          temperature: data.temperature || 0,
-          humidity: data.humidity || 0,
-          prediction: data.prediction || 0,
-          timestamp: Date.now(),
-        };
-
-        setSensorData(newData);
-        setLastUpdate(new Date());
-        setEspStatus('online');
-        
-        // Reset ESP timeout
-        if (espTimeoutRef.current) {
-          clearTimeout(espTimeoutRef.current);
-        }
-        espTimeoutRef.current = setTimeout(() => {
-          setEspStatus('offline');
-        }, 15000); // 15 seconds timeout
-        
-        const newHistory = [...history.slice(-99), newData];
-        setHistory(newHistory);
-        localStorage.setItem('sensorHistory', JSON.stringify(newHistory));
-
-        // Check thresholds and set alerts
-        const alerts = [];
-        if (newData.gas > 80) alerts.push(`Gas: ${newData.gas}ppm`);
-        if (newData.flame > 0) alerts.push(`Flame: ${newData.flame}`);
-        if (newData.temperature > 40) alerts.push(`Temp: ${newData.temperature}°C`);
-        if (newData.humidity > 90) alerts.push(`Humidity: ${newData.humidity}%`);
-        
-        if (newData.prediction > 0.5 || alerts.length > 0) {
-          setAnomalyDetected(true);
-          const newTotal = totalAnomalies + 1;
-          setTotalAnomalies(newTotal);
-          localStorage.setItem('totalAnomalies', newTotal.toString());
-          setAlertMessage(alerts.length > 0 ? `Thresholds exceeded: ${alerts.join(', ')}` : 'Anomaly detected!');
-          setTimeout(() => {
-            setAnomalyDetected(false);
-            setAlertMessage('');
-          }, 5000);
-        }
-      } catch (err) {
-        console.error('Failed to process message:', err);
-      }
-    });
-
-    clientRef.current = client;
+      );
+    }
 
     return () => {
-      if (client) {
-        client.end();
-      }
+      mqttService.disconnect();
     };
-  }, [history, totalAnomalies]);
+  }, [user, mqttService]);
 
-  const exportData = () => {
-    const dataStr = JSON.stringify(history, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `sensor-data-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-  };
-
-  const clearData = () => {
-    if (confirm('Are you sure you want to clear all data?')) {
-      setHistory([]);
-      setTotalAnomalies(0);
-      localStorage.removeItem('sensorHistory');
-      localStorage.removeItem('totalAnomalies');
+  const handleVoiceCommand = (command: string) => {
+    const lowerCommand = command.toLowerCase();
+    
+    if (lowerCommand.includes('emergency') || lowerCommand.includes('evacuation')) {
+      setEmergencyMode(true);
+    } else if (lowerCommand.includes('gas') && lowerCommand.includes('zone')) {
+      alert('Gas levels are within normal range in all zones.');
+    } else if (lowerCommand.includes('temperature')) {
+      alert('Current temperature: 28°C average across all zones.');
     }
   };
 
-  const getStats = () => {
-    if (history.length === 0) return null;
-    return {
-      avgGas: Math.round(history.reduce((sum, d) => sum + d.gas, 0) / history.length),
-      avgTemp: Math.round(history.reduce((sum, d) => sum + d.temperature, 0) / history.length),
-      avgHumidity: Math.round(history.reduce((sum, d) => sum + d.humidity, 0) / history.length),
-      maxGas: Math.max(...history.map(d => d.gas)),
-      maxTemp: Math.max(...history.map(d => d.temperature)),
-      dataPoints: history.length
+  const handleIncidentReport = (report: Omit<IncidentReport, 'id' | 'timestamp'>) => {
+    const newReport: IncidentReport = {
+      ...report,
+      id: Date.now().toString(),
+      timestamp: Date.now()
     };
+    setIncidents(prev => [...prev, newReport]);
+    alert('Incident report submitted successfully!');
   };
 
-  const stats = getStats();
+  const handleEmergencyBroadcast = (message: string) => {
+    alert(`Emergency broadcast sent: ${message}`);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+  };
+
+  const handleExport = () => {
+    const data = {
+      sensors: currentSensors,
+      alerts: alerts,
+      timestamp: new Date().toISOString(),
+      floor: activeFloor
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `safety-report-${activeFloor}-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    // Show success notification
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-emerald-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg z-50 animate-in slide-in-from-right-2 duration-300';
+    notification.innerHTML = '✅ Report exported successfully!';
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  };
+
+  const handleShowAlerts = () => {
+    setShowAlertsModal(true);
+  };
+
+  const handleShowUsers = () => {
+    if (user?.role === 'admin') {
+      setShowUsersModal(true);
+    } else {
+      // Show access denied notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-red-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg z-50 animate-in slide-in-from-right-2 duration-300';
+      notification.innerHTML = '🚫 Access denied - Admin only';
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+  };
+
+  const handleShowSettings = () => {
+    if (user?.role === 'admin') {
+      setShowSettingsModal(true);
+    } else {
+      // Show access denied notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-red-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg z-50 animate-in slide-in-from-right-2 duration-300';
+      notification.innerHTML = '🚫 Access denied - Admin only';
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+  };
+
+  if (!user) {
+    return <Login onLogin={setUser} />;
+  }
+
+  const floors = ['Floor 1', 'Floor 2', 'Warehouse'];
+  const currentSensors = sensors.filter(s => s.floor === activeFloor);
+  const currentData = currentSensors.length > 0 ? currentSensors.map(s => ({
+    gas: s.gas,
+    flame: s.flame,
+    temperature: s.temperature,
+    humidity: s.humidity,
+    prediction: s.prediction,
+    timestamp: s.timestamp
+  })) : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              MQTT Sensor Dashboard
-            </h1>
-            <p className="text-gray-400">Real-time TinyML Anomaly Detection System</p>
-            {lastUpdate && (
-              <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
-                <Clock size={14} />
-                <span>Last update: {lastUpdate.toLocaleTimeString()}</span>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800/30 text-sm">
-              <BarChart3 size={16} className="text-purple-400" />
-              <span className="text-gray-300">{totalAnomalies} Anomalies</span>
-            </div>
-            <div className="flex items-center gap-2">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-800 relative">
+      {/* Animated Background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
+
+      {/* Header */}
+      <div className="bg-white/5 backdrop-blur-2xl shadow-2xl border-b border-white/10 relative z-10">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-purple-500/5 to-blue-500/5"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-4">
               <button
-                onClick={exportData}
-                className="p-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 transition-all duration-300"
-                title="Export Data"
+                onClick={() => setShowSidebar(!showSidebar)}
+                className="text-gray-400 hover:text-white p-3 rounded-xl hover:bg-white/10 transition-all duration-300 border border-white/10 hover:border-white/20"
               >
-                <Download size={18} />
+                {showSidebar ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
+              <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 via-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+                <Shield className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  DHEEMA
+                </h1>
+                <p className="text-gray-500 text-xs mt-1">Detection Hub for Emergency Event Monitoring & Analysis</p>
+                <div className="flex items-center space-x-6">
+                  <span className="text-gray-400 text-sm">Welcome, <span className="text-cyan-400 font-semibold">{user.name}</span> <span className="text-purple-400">({user.role})</span></span>
+                  
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <FloorTabs floors={floors} activeFloor={activeFloor} onFloorChange={setActiveFloor} />
+              
+              {user.role === 'worker' && (
+                <IncidentReporting onSubmitReport={handleIncidentReport} userId={user.id} />
+              )}
+              
+              {(user.role === 'admin' || user.role === 'supervisor') && (
+                <button
+                  onClick={() => setEmergencyMode(!emergencyMode)}
+                  className={`flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-2xl border border-white/20 hover:border-white/30 transition-all duration-300 backdrop-blur-sm ${
+                    emergencyMode 
+                      ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-2xl shadow-red-500/40 animate-pulse scale-105' 
+                      : 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-xl hover:shadow-amber-500/30 hover:scale-105 border border-amber-500/30'
+                  }`}
+                >
+                  {emergencyMode ? '🚨 EMERGENCY ACTIVE' : 'Activate Emergency'}
+                </button>
+              )}
+              
               <button
-                onClick={clearData}
-                className="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 transition-all duration-300"
-                title="Clear Data"
+                onClick={handleLogout}
+                className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-2xl border border-white/20 hover:border-white/30 transition-all duration-300 backdrop-blur-sm"
               >
-                <Trash2 size={18} />
+                <LogOut size={18} />
+                <span className="font-semibold">Logout</span>
               </button>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/50 backdrop-blur transition-all duration-300">
-              {connectionStatus === 'connected' ? (
-                <>
-                  <div className="relative">
-                    <Wifi className="text-green-400 transition-colors duration-300" size={20} />
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  </div>
-                  <span className="text-green-400 font-medium transition-colors duration-300">Connected</span>
-                </>
-              ) : connectionStatus === 'connecting' ? (
-                <>
-                  <div className="animate-spin">
-                    <Wifi className="text-yellow-400 transition-colors duration-300" size={20} />
-                  </div>
-                  <span className="text-yellow-400 font-medium transition-colors duration-300">Connecting...</span>
-                </>
-              ) : connectionStatus === 'reconnecting' ? (
-                <>
-                  <div className="animate-pulse">
-                    <WifiOff className="text-orange-400 transition-colors duration-300" size={20} />
-                  </div>
-                  <span className="text-orange-400 font-medium transition-colors duration-300">
-                    Reconnecting ({reconnectAttempts})
-                  </span>
-                </>
-              ) : connectionStatus === 'error' ? (
-                <>
-                  <WifiOff className="text-red-500 transition-colors duration-300" size={20} />
-                  <span className="text-red-500 font-medium transition-colors duration-300">Error</span>
-                </>
-              ) : (
-                <>
-                  <WifiOff className="text-red-400 transition-colors duration-300" size={20} />
-                  <span className="text-red-400 font-medium transition-colors duration-300">Disconnected</span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className={`transition-all duration-500 ease-in-out ${anomalyDetected ? 'opacity-100 max-h-20 mb-6' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-          <AlertBanner
-            message={alertMessage || "Anomaly Detected! Prediction threshold exceeded."}
-            prediction={sensorData?.prediction || 0}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 transition-all duration-300">
-          <SensorCard
-            title="Gas Level"
-            value={sensorData?.gas}
-            unit="ppm"
-            icon={Activity}
-            color="blue"
-            anomaly={anomalyDetected && (sensorData?.gas || 0) > 80}
-            previousValue={history[history.length - 2]?.gas}
-            threshold={100}
-          />
-          <SensorCard
-            title="Flame Sensor"
-            value={sensorData?.flame}
-            unit=""
-            icon={Flame}
-            color="orange"
-            anomaly={anomalyDetected && (sensorData?.flame || 0) > 0}
-            previousValue={history[history.length - 2]?.flame}
-            threshold={1}
-          />
-          <SensorCard
-            title="Temperature"
-            value={sensorData?.temperature}
-            unit="°C"
-            icon={Thermometer}
-            color="red"
-            anomaly={anomalyDetected && (sensorData?.temperature || 0) > 40}
-            previousValue={history[history.length - 2]?.temperature}
-            threshold={50}
-          />
-          <SensorCard
-            title="Humidity"
-            value={sensorData?.humidity}
-            unit="%"
-            icon={Droplets}
-            color="cyan"
-            anomaly={anomalyDetected && (sensorData?.humidity || 0) > 90}
-            previousValue={history[history.length - 2]?.humidity}
-            threshold={100}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-          <div className="xl:col-span-2 bg-gray-800/50 backdrop-blur rounded-xl p-6 shadow-xl border border-gray-700 transition-all duration-300 hover:bg-gray-800/60">
-            <h2 className="text-2xl font-bold mb-4 transition-colors duration-300">Sensor Trends</h2>
-            <SensorChart data={history} />
-          </div>
-          
-          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 shadow-xl border border-gray-700 transition-all duration-300">
-            <h3 className="text-xl font-bold mb-4 text-purple-400 flex items-center gap-2">
-              <Zap size={20} />
-              {stats ? 'Statistics' : 'System Status'}
-            </h3>
-            {stats ? (
-              <div className="space-y-4">
-                <div className="bg-gray-700/30 rounded-lg p-3">
-                  <div className="text-sm text-gray-400">Average Gas Level</div>
-                  <div className="text-2xl font-bold text-blue-400">{stats.avgGas} ppm</div>
-                </div>
-                <div className="bg-gray-700/30 rounded-lg p-3">
-                  <div className="text-sm text-gray-400">Average Temperature</div>
-                  <div className="text-2xl font-bold text-red-400">{stats.avgTemp}°C</div>
-                </div>
-                <div className="bg-gray-700/30 rounded-lg p-3">
-                  <div className="text-sm text-gray-400">Average Humidity</div>
-                  <div className="text-2xl font-bold text-cyan-400">{stats.avgHumidity}%</div>
-                </div>
-                <div className="bg-gray-700/30 rounded-lg p-3">
-                  <div className="text-sm text-gray-400">Peak Values</div>
-                  <div className="text-sm text-gray-300">
-                    Gas: {stats.maxGas}ppm | Temp: {stats.maxTemp}°C
-                  </div>
-                </div>
-                <div className="bg-gray-700/30 rounded-lg p-3">
-                  <div className="text-sm text-gray-400">Data Points</div>
-                  <div className="text-lg font-semibold text-green-400">{stats.dataPoints}</div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                {connectionStatus === 'connected' ? (
-                  <div>
-                    <LoadingSpinner />
-                    <p className="text-gray-400 mt-4">Waiting for sensor data...</p>
-                  </div>
-                ) : connectionStatus === 'connecting' || connectionStatus === 'reconnecting' ? (
-                  <div>
-                    <LoadingSpinner />
-                    <p className="text-gray-400 mt-4">
-                      {connectionStatus === 'connecting' ? 'Connecting to broker...' : `Reconnecting... (Attempt ${reconnectAttempts})`}
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    <WifiOff className="mx-auto text-gray-500 mb-4" size={48} />
-                    <p className="text-gray-400">
-                      {connectionStatus === 'error' ? 'Connection failed' : 'Connect to MQTT broker to view statistics'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-700 transition-all duration-300 hover:bg-gray-800/40">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3 transition-colors duration-300">Connection Details</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Broker:</span>
-                <span className="text-gray-300 font-mono text-xs">{MQTT_BROKER}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Topic:</span>
-                <span className="text-gray-300 font-mono">{MQTT_TOPIC}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Broker:</span>
-                <span className={`font-medium ${
-                  connectionStatus === 'connected' ? 'text-green-400' :
-                  connectionStatus === 'connecting' ? 'text-yellow-400' :
-                  connectionStatus === 'reconnecting' ? 'text-orange-400' :
-                  connectionStatus === 'error' ? 'text-red-500' : 'text-red-400'
-                }`}>
-                  {connectionStatus === 'connected' ? 'Connected' :
-                   connectionStatus === 'connecting' ? 'Connecting' :
-                   connectionStatus === 'reconnecting' ? `Reconnecting (${reconnectAttempts})` :
-                   connectionStatus === 'error' ? 'Error' : 'Disconnected'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">ESP Device:</span>
-                <span className={`font-medium flex items-center gap-1 ${
-                  espStatus === 'online' ? 'text-green-400' :
-                  espStatus === 'offline' ? 'text-red-400' : 'text-gray-400'
-                }`}>
-                  <div className={`w-2 h-2 rounded-full ${
-                    espStatus === 'online' ? 'bg-green-400 animate-pulse' :
-                    espStatus === 'offline' ? 'bg-red-400' : 'bg-gray-400'
-                  }`}></div>
-                  {espStatus === 'online' ? 'Online' :
-                   espStatus === 'offline' ? 'Offline' : 'Unknown'}
-                </span>
-              </div>
-              {lastUpdate && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Last Data:</span>
-                  <span className="text-gray-300 text-xs">
-                    {lastUpdate.toLocaleTimeString()}
-                  </span>
-                </div>
-              )}
-              {connectionTime && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Connected Since:</span>
-                  <span className="text-gray-300 text-xs">
-                    {connectionTime.toLocaleTimeString()}
-                  </span>
-                </div>
-              )}
-              {reconnectAttempts > 0 && connectionStatus !== 'connected' && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Reconnect Attempts:</span>
-                  <span className="text-orange-400">{reconnectAttempts}</span>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-700 transition-all duration-300 hover:bg-gray-800/40">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3">Thresholds</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Gas Alert:</span>
-                <span className="text-orange-400">&gt; 80 ppm</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Flame Alert:</span>
-                <span className="text-red-400">&gt; 0</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Temp Alert:</span>
-                <span className="text-red-400">&gt; 40°C</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Humidity Alert:</span>
-                <span className="text-cyan-400">&gt; 90%</span>
-              </div>
             </div>
           </div>
         </div>
       </div>
-      
-      <footer className="mt-12 py-6 border-t border-gray-700/50">
-        <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
-          <p>© 2024 MQTT Sensor Dashboard | Real-time IoT Monitoring System</p>
+
+      {/* Emergency Banner */}
+      {emergencyMode && (
+        <div className="bg-gradient-to-r from-red-900 via-red-800 to-red-900 border-b border-red-600/50 animate-pulse relative overflow-hidden">
+          <div className="absolute inset-0 bg-red-500/10 animate-pulse"></div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 relative">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center animate-bounce">
+                <AlertTriangle className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-red-100 font-bold text-lg tracking-wide">
+                🚨 EMERGENCY MODE ACTIVE - FOLLOW EVACUATION PROCEDURES 🚨
+              </span>
+              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center animate-bounce">
+                <AlertTriangle className="h-5 w-5 text-white" />
+              </div>
+            </div>
+          </div>
         </div>
-      </footer>
+      )}
+
+      {/* Main Layout */}
+      <div className="flex h-screen">
+        {/* Modern Sidebar */}
+        <div className={`${showSidebar ? 'w-96' : 'w-0'} transition-all duration-500 overflow-hidden bg-white/5 backdrop-blur-3xl border-r border-white/10 relative`}>
+          <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/5 to-transparent"></div>
+          <div className="p-6 space-y-6 relative z-10 h-full overflow-y-auto">
+            
+            {/* User Profile Card */}
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
+              <div className="flex items-center space-x-4">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg ${
+                  user.role === 'admin' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
+                  user.role === 'supervisor' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
+                  'bg-gradient-to-r from-emerald-500 to-emerald-600'
+                }`}>
+                  {user.name.charAt(0)}
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg">{user.name}</h3>
+                  <p className="text-gray-400 text-sm">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                  <div className={`inline-flex items-center space-x-2 mt-2 px-3 py-1 rounded-full text-xs font-semibold ${
+                    mqttConnected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'
+                  }`}>
+                    <div className={`w-2 h-2 rounded-full ${mqttConnected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`}></div>
+                    <span>{mqttConnected ? 'CONNECTED' : 'OFFLINE'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+           
+            {/* View Selector */}
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
+              <h4 className="text-white font-bold mb-4 flex items-center">
+                <Map className="h-5 w-5 mr-3 text-cyan-400" />
+                Dashboard Views
+              </h4>
+              <div className="space-y-3">
+                {[
+                  { key: 'dashboard', label: 'Real-time Dashboard', icon: '📊' },
+                  { key: 'heatmap', label: 'Risk Heatmap', icon: '🔥' },
+                  { key: '3d', label: '3D Factory Model', icon: '🏭' },
+                  { key: 'chart', label: 'Analytics Charts', icon: '📈' }
+                ].map((view) => (
+                  <button
+                    key={view.key}
+                    onClick={() => setActiveView(view.key as any)}
+                    className={`w-full flex items-center space-x-3 p-4 rounded-2xl text-left font-semibold transition-all duration-300 ${
+                      activeView === view.key
+                        ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-lg shadow-cyan-500/30 scale-105'
+                        : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'
+                    }`}
+                  >
+                    <span className="text-xl">{view.icon}</span>
+                    <span>{view.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* AI Assistant */}
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
+              <h4 className="text-white font-bold mb-4 flex items-center">
+                <Bot className="h-5 w-5 mr-3 text-purple-400" />
+                Gemini Flash 2.0
+              </h4>
+              <div className="space-y-3">
+                <button
+                  onClick={() => { setAIPanelTab('voice'); setShowAIPanel(true); }}
+                  className="w-full flex items-center space-x-3 p-4 bg-blue-500/20 hover:bg-blue-500/30 rounded-2xl text-blue-300 hover:text-white transition-all duration-300 border border-blue-500/30"
+                >
+                  <Mic className="h-5 w-5" />
+                  <span className="font-semibold">Voice Commands</span>
+                </button>
+                <button
+                  onClick={() => { setAIPanelTab('search'); setShowAIPanel(true); }}
+                  className="w-full flex items-center space-x-3 p-4 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-2xl text-emerald-300 hover:text-white transition-all duration-300 border border-emerald-500/30"
+                >
+                  <Search className="h-5 w-5" />
+                  <span className="font-semibold">Smart Search</span>
+                </button>
+                <button
+                  onClick={() => { setAIPanelTab('chat'); setShowAIPanel(true); }}
+                  className="w-full flex items-center space-x-3 p-4 bg-purple-500/20 hover:bg-purple-500/30 rounded-2xl text-purple-300 hover:text-white transition-all duration-300 border border-purple-500/30"
+                >
+                  <Bot className="h-5 w-5" />
+                  <span className="font-semibold">AI Chat</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Emergency Controls */}
+            {(user.role === 'admin' || user.role === 'supervisor') && (
+              <div className="bg-red-500/10 backdrop-blur-sm border border-red-500/20 rounded-3xl p-6">
+                <h4 className="text-red-300 font-bold mb-4 flex items-center">
+                  <AlertTriangle className="h-5 w-5 mr-3" />
+                  Emergency Controls
+                </h4>
+                <button
+                  onClick={() => setEmergencyMode(!emergencyMode)}
+                  className={`w-full p-4 rounded-2xl font-bold transition-all duration-300 ${
+                    emergencyMode 
+                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse shadow-lg shadow-red-500/30' 
+                      : 'bg-white/10 text-red-300 hover:bg-red-500/20 hover:text-white border border-red-500/30'
+                  }`}
+                >
+                  {emergencyMode ? '🚨 EMERGENCY ACTIVE' : 'Activate Emergency Mode'}
+                </button>
+              </div>
+            )}
+
+            {/* Quick Actions */}
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
+              <h4 className="text-white font-bold mb-4 flex items-center">
+                <Settings className="h-5 w-5 mr-3 text-gray-400" />
+                Quick Actions
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={handleExport}
+                  className="flex flex-col items-center p-4 bg-blue-500/20 hover:bg-blue-500/30 rounded-2xl text-blue-300 hover:text-white transition-all duration-300 hover:scale-105"
+                >
+                  <Download className="h-6 w-6 mb-2" />
+                  <span className="text-xs font-semibold">Export</span>
+                </button>
+                <button 
+                  onClick={handleShowAlerts}
+                  className="flex flex-col items-center p-4 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-2xl text-emerald-300 hover:text-white transition-all duration-300 hover:scale-105 relative"
+                >
+                  <Bell className="h-6 w-6 mb-2" />
+                  <span className="text-xs font-semibold">Alerts</span>
+                  {alerts.length > 0 && (
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white">
+                      {alerts.length}
+                    </div>
+                  )}
+                </button>
+                {user.role === 'admin' && (
+                  <>
+                    <button 
+                      onClick={handleShowUsers}
+                      className="flex flex-col items-center p-4 bg-purple-500/20 hover:bg-purple-500/30 rounded-2xl text-purple-300 hover:text-white transition-all duration-300 hover:scale-105"
+                    >
+                      <Users className="h-6 w-6 mb-2" />
+                      <span className="text-xs font-semibold">Users</span>
+                    </button>
+                    <button 
+                      onClick={handleShowSettings}
+                      className="flex flex-col items-center p-4 bg-orange-500/20 hover:bg-orange-500/30 rounded-2xl text-orange-300 hover:text-white transition-all duration-300 hover:scale-105"
+                    >
+                      <Settings className="h-6 w-6 mb-2" />
+                      <span className="text-xs font-semibold">Settings</span>
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
+              <h4 className="text-white font-bold mb-4 flex items-center">
+                <Activity className="h-5 w-5 mr-3 text-cyan-400" />
+                Quick Stats - {activeFloor}
+              </h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-emerald-500/20 rounded-2xl">
+                  <span className="text-emerald-300 font-semibold">Active Sensors</span>
+                  <span className="text-emerald-400 font-bold text-xl">{currentSensors.length}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-red-500/20 rounded-2xl">
+                  <span className="text-red-300 font-semibold">Critical Alerts</span>
+                  <span className="text-red-400 font-bold text-xl">{currentSensors.filter(s => s.status === 'critical').length}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-blue-500/20 rounded-2xl">
+                  <span className="text-blue-300 font-semibold">MQTT Status</span>
+                  <span className={`font-bold text-sm px-2 py-1 rounded-full ${
+                    mqttConnected ? 'bg-emerald-500/30 text-emerald-300' : 'bg-red-500/30 text-red-300'
+                  }`}>
+                    {mqttConnected ? 'ONLINE' : 'OFFLINE'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Emergency Contacts */}
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
+              <h4 className="text-white font-bold mb-4 flex items-center">
+                <Phone className="h-5 w-5 mr-3 text-green-400" />
+                Emergency Contacts
+              </h4>
+              <div className="space-y-3">
+                <button 
+                  onClick={() => {
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 right-4 bg-red-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg z-50 animate-in slide-in-from-right-2 duration-300';
+                    notification.innerHTML = '📞 Calling Fire Department...';
+                    document.body.appendChild(notification);
+                    setTimeout(() => notification.remove(), 3000);
+                  }}
+                  className="w-full flex items-center justify-between p-3 bg-red-500/20 hover:bg-red-500/30 rounded-2xl transition-all duration-300 hover:scale-105"
+                >
+                  <span className="text-red-300 font-semibold">Fire Department</span>
+                  <span className="text-red-400 font-bold font-mono bg-red-500/30 px-3 py-1 rounded-full">911</span>
+                </button>
+                <button 
+                  onClick={() => {
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 right-4 bg-yellow-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg z-50 animate-in slide-in-from-right-2 duration-300';
+                    notification.innerHTML = '📞 Calling Security...';
+                    document.body.appendChild(notification);
+                    setTimeout(() => notification.remove(), 3000);
+                  }}
+                  className="w-full flex items-center justify-between p-3 bg-yellow-500/20 hover:bg-yellow-500/30 rounded-2xl transition-all duration-300 hover:scale-105"
+                >
+                  <span className="text-yellow-300 font-semibold">Security</span>
+                  <span className="text-yellow-400 font-bold font-mono bg-yellow-500/30 px-3 py-1 rounded-full">5555</span>
+                </button>
+                <button 
+                  onClick={() => {
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 right-4 bg-emerald-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg z-50 animate-in slide-in-from-right-2 duration-300';
+                    notification.innerHTML = '📞 Calling Medical Emergency...';
+                    document.body.appendChild(notification);
+                    setTimeout(() => notification.remove(), 3000);
+                  }}
+                  className="w-full flex items-center justify-between p-3 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-2xl transition-all duration-300 hover:scale-105"
+                >
+                  <span className="text-emerald-300 font-semibold">Medical</span>
+                  <span className="text-emerald-400 font-bold font-mono bg-emerald-500/30 px-3 py-1 rounded-full">911</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Content Area */}
+          <div className="flex-1 overflow-auto p-6 relative z-10">
+            {/* Emergency Banner */}
+            {emergencyMode && (
+              <div className="mb-6">
+                <EmergencyEvacuation
+                  isActive={emergencyMode}
+                  floor={activeFloor}
+                  onBroadcast={handleEmergencyBroadcast}
+                />
+              </div>
+            )}
+
+            {/* Dynamic Content Based on Active View */}
+            {activeView === 'dashboard' && (
+              <RealTimeDashboard
+                user={user}
+                sensors={currentSensors}
+                activeFloor={activeFloor}
+                emergencyMode={emergencyMode}
+              />
+            )}
+            
+            {activeView === 'heatmap' && (
+              <Heatmap sensors={currentSensors} floor={activeFloor} />
+            )}
+            
+            {activeView === '3d' && (
+              <Factory3D sensors={currentSensors} floor={activeFloor} />
+            )}
+            
+            {activeView === 'chart' && currentData.length > 0 && (
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+                <h3 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Real-time Analytics - {activeFloor}</h3>
+                <SensorChart data={currentData} />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Modals */}
+      <AIPanel
+        isOpen={showAIPanel}
+        onClose={() => setShowAIPanel(false)}
+        activeTab={aiPanelTab}
+        sensors={currentSensors}
+        alerts={alerts}
+        onVoiceCommand={handleVoiceCommand}
+      />
+
+      {/* Alerts Modal */}
+      {showAlertsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-white/20">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white flex items-center">
+                  <Bell className="h-6 w-6 mr-3 text-emerald-400" />
+                  Recent Alerts ({alerts.length})
+                </h3>
+                <button
+                  onClick={() => setShowAlertsModal(false)}
+                  className="text-gray-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all duration-300"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 max-h-96 overflow-y-auto">
+              {alerts.length > 0 ? (
+                <div className="space-y-4">
+                  {alerts.map((alert) => (
+                    <div key={alert.id} className={`p-4 rounded-2xl border ${
+                      alert.severity === 'high' ? 'bg-red-500/20 border-red-500/30' :
+                      alert.severity === 'medium' ? 'bg-yellow-500/20 border-yellow-500/30' :
+                      'bg-blue-500/20 border-blue-500/30'
+                    }`}>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-semibold text-white mb-1">{alert.message}</h4>
+                          <p className="text-gray-400 text-sm">{alert.location}</p>
+                          <p className="text-gray-500 text-xs mt-2">{new Date(alert.timestamp).toLocaleString()}</p>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          alert.severity === 'high' ? 'bg-red-500/30 text-red-300' :
+                          alert.severity === 'medium' ? 'bg-yellow-500/30 text-yellow-300' :
+                          'bg-blue-500/30 text-blue-300'
+                        }`}>
+                          {alert.severity.toUpperCase()}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Bell className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+                  <p className="text-gray-400">No alerts at this time</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Users Modal */}
+      {showUsersModal && user.role === 'admin' && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl w-full max-w-2xl">
+            <div className="p-6 border-b border-white/20">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white flex items-center">
+                  <Users className="h-6 w-6 mr-3 text-purple-400" />
+                  User Management
+                </h3>
+                <button
+                  onClick={() => setShowUsersModal(false)}
+                  className="text-gray-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all duration-300"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                {[
+                  { name: 'System Administrator', role: 'admin', status: 'online', email: 'admin@factory.com' },
+                  { name: 'Floor Supervisor', role: 'supervisor', status: 'online', email: 'supervisor@factory.com' },
+                  { name: 'Factory Worker', role: 'worker', status: 'offline', email: 'worker@factory.com' }
+                ].map((u, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-white/10 rounded-2xl">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold ${
+                        u.role === 'admin' ? 'bg-purple-500' :
+                        u.role === 'supervisor' ? 'bg-blue-500' : 'bg-emerald-500'
+                      }`}>
+                        {u.name.charAt(0)}
+                      </div>
+                      <div>
+                        <h4 className="text-white font-semibold">{u.name}</h4>
+                        <p className="text-gray-400 text-sm">{u.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        u.status === 'online' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {u.status.toUpperCase()}
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        u.role === 'admin' ? 'bg-purple-500/20 text-purple-300' :
+                        u.role === 'supervisor' ? 'bg-blue-500/20 text-blue-300' :
+                        'bg-emerald-500/20 text-emerald-300'
+                      }`}>
+                        {u.role.toUpperCase()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsModal && user.role === 'admin' && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl w-full max-w-2xl">
+            <div className="p-6 border-b border-white/20">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white flex items-center">
+                  <Settings className="h-6 w-6 mr-3 text-orange-400" />
+                  System Settings
+                </h3>
+                <button
+                  onClick={() => setShowSettingsModal(false)}
+                  className="text-gray-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all duration-300"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-6">
+                <div className="bg-white/10 rounded-2xl p-4">
+                  <h4 className="text-white font-semibold mb-3">Alert Thresholds</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300">Gas Level (ppm)</span>
+                      <input type="number" defaultValue="70" className="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-white w-20" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300">Temperature (°C)</span>
+                      <input type="number" defaultValue="35" className="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-white w-20" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300">Humidity (%)</span>
+                      <input type="number" defaultValue="85" className="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-white w-20" />
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white/10 rounded-2xl p-4">
+                  <h4 className="text-white font-semibold mb-3">Notification Settings</h4>
+                  <div className="space-y-3">
+                    <label className="flex items-center space-x-3">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-gray-300">Email Notifications</span>
+                    </label>
+                    <label className="flex items-center space-x-3">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-gray-300">SMS Alerts</span>
+                    </label>
+                    <label className="flex items-center space-x-3">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-gray-300">WhatsApp Integration</span>
+                    </label>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    setShowSettingsModal(false);
+                    // Show success notification
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 right-4 bg-emerald-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg z-50 animate-in slide-in-from-right-2 duration-300';
+                    notification.innerHTML = '✅ Settings saved successfully!';
+                    document.body.appendChild(notification);
+                    setTimeout(() => {
+                      notification.remove();
+                    }, 3000);
+                  }}
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 rounded-2xl font-semibold hover:scale-105 transition-all duration-300"
+                >
+                  Save Settings
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
