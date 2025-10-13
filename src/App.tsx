@@ -173,42 +173,43 @@ function App() {
   })) : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-800 relative">
-      {/* Animated Background */}
-      <div className="absolute inset-0">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 transition-all duration-500">
+      {/* Animated Background Pattern */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)] animate-pulse"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(99,102,241,0.05)_25%,rgba(99,102,241,0.05)_50%,transparent_50%,transparent_75%,rgba(99,102,241,0.05)_75%)] bg-[length:60px_60px] animate-[slide_20s_linear_infinite]"></div>
       </div>
 
-      {/* Header */}
-      <div className="bg-white/5 backdrop-blur-2xl shadow-2xl border-b border-white/10 relative z-10">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-purple-500/5 to-blue-500/5"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
+      {/* Modern Header */}
+      <div className="bg-white/80 backdrop-blur-xl shadow-lg border-b border-white/20 relative z-10 animate-in slide-in-from-top duration-700">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex justify-between items-center py-5">
+            <div className="flex items-center space-x-6">
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
-                className="text-gray-400 hover:text-white p-3 rounded-xl hover:bg-white/10 transition-all duration-300 border border-white/10 hover:border-white/20"
+                className="text-slate-600 hover:text-slate-900 p-3 rounded-xl hover:bg-white/60 transition-all duration-300 hover:scale-110 hover:shadow-lg"
               >
-                {showSidebar ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {showSidebar ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
-              <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 via-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <Shield className="h-7 w-7 text-white" />
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                <Shield className="h-8 w-8 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <div className="animate-in fade-in slide-in-from-left duration-700 delay-200">
+                <h1 className="text-3xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                   DHEEMA
                 </h1>
-                <p className="text-gray-500 text-xs mt-1">Detection Hub for Emergency Event Monitoring & Analysis</p>
-                <div className="flex items-center space-x-6">
-                  <span className="text-gray-400 text-sm">Welcome, <span className="text-cyan-400 font-semibold">{user.name}</span> <span className="text-purple-400">({user.role})</span></span>
-                  
-                </div>
+                <p className="text-slate-500 text-sm font-medium tracking-wide">Detection Hub for Emergency Event Monitoring & Analysis</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6 animate-in fade-in slide-in-from-right duration-700 delay-300">
+              <div className="text-slate-600 text-sm bg-white/60 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/30">
+                Welcome, <span className="font-bold text-slate-900">{user.name}</span> 
+                <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs rounded-lg font-semibold">
+                  {user.role.toUpperCase()}
+                </span>
+              </div>
+            
               <FloorTabs floors={floors} activeFloor={activeFloor} onFloorChange={setActiveFloor} />
               
               {user.role === 'worker' && (
@@ -218,21 +219,21 @@ function App() {
               {(user.role === 'admin' || user.role === 'supervisor') && (
                 <button
                   onClick={() => setEmergencyMode(!emergencyMode)}
-                  className={`flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-2xl border border-white/20 hover:border-white/30 transition-all duration-300 backdrop-blur-sm ${
+                  className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl ${
                     emergencyMode 
-                      ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-2xl shadow-red-500/40 animate-pulse scale-105' 
-                      : 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-xl hover:shadow-amber-500/30 hover:scale-105 border border-amber-500/30'
+                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse shadow-red-500/30' 
+                      : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white hover:from-orange-600 hover:to-amber-700 shadow-orange-500/30'
                   }`}
                 >
-                  {emergencyMode ? '🚨 EMERGENCY ACTIVE' : 'Activate Emergency'}
+                  {emergencyMode ? '🚨 Emergency Active' : 'Activate Emergency'}
                 </button>
               )}
               
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-2xl border border-white/20 hover:border-white/30 transition-all duration-300 backdrop-blur-sm"
+                className="flex items-center space-x-2 px-5 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-white/30"
               >
-                <LogOut size={18} />
+                <LogOut size={20} />
                 <span className="font-semibold">Logout</span>
               </button>
             </div>
@@ -242,19 +243,14 @@ function App() {
 
       {/* Emergency Banner */}
       {emergencyMode && (
-        <div className="bg-gradient-to-r from-red-900 via-red-800 to-red-900 border-b border-red-600/50 animate-pulse relative overflow-hidden">
-          <div className="absolute inset-0 bg-red-500/10 animate-pulse"></div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 relative">
-            <div className="flex items-center justify-center space-x-3">
-              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center animate-bounce">
-                <AlertTriangle className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-red-100 font-bold text-lg tracking-wide">
+        <div className="bg-gradient-to-r from-red-600 via-red-500 to-red-600 border-b border-red-700/50 animate-in slide-in-from-top duration-500 delay-100">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-center space-x-4 animate-pulse">
+              <AlertTriangle className="h-6 w-6 text-white animate-bounce" />
+              <span className="text-white font-bold text-lg tracking-wide">
                 🚨 EMERGENCY MODE ACTIVE - FOLLOW EVACUATION PROCEDURES 🚨
               </span>
-              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center animate-bounce">
-                <AlertTriangle className="h-5 w-5 text-white" />
-              </div>
+              <AlertTriangle className="h-6 w-6 text-white animate-bounce" />
             </div>
           </div>
         </div>
@@ -263,27 +259,26 @@ function App() {
       {/* Main Layout */}
       <div className="flex h-screen">
         {/* Modern Sidebar */}
-        <div className={`${showSidebar ? 'w-96' : 'w-0'} transition-all duration-500 overflow-hidden bg-white/5 backdrop-blur-3xl border-r border-white/10 relative`}>
-          <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/5 to-transparent"></div>
-          <div className="p-6 space-y-6 relative z-10 h-full overflow-y-auto">
+        <div className={`${showSidebar ? 'w-96' : 'w-0'} transition-all duration-500 ease-in-out overflow-hidden bg-white/90 backdrop-blur-xl border-r border-white/30 shadow-2xl`}>
+          <div className="p-8 space-y-8 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
             
             {/* User Profile Card */}
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
+            <div className="bg-gradient-to-br from-white/80 to-slate-50/80 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-left duration-700">
               <div className="flex items-center space-x-4">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg ${
-                  user.role === 'admin' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
-                  user.role === 'supervisor' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-                  'bg-gradient-to-r from-emerald-500 to-emerald-600'
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 ${
+                  user.role === 'admin' ? 'bg-gradient-to-br from-purple-600 to-purple-700' :
+                  user.role === 'supervisor' ? 'bg-gradient-to-br from-blue-600 to-blue-700' :
+                  'bg-gradient-to-br from-emerald-600 to-emerald-700'
                 }`}>
                   {user.name.charAt(0)}
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-lg">{user.name}</h3>
-                  <p className="text-gray-400 text-sm">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
-                  <div className={`inline-flex items-center space-x-2 mt-2 px-3 py-1 rounded-full text-xs font-semibold ${
-                    mqttConnected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'
+                  <h3 className="text-slate-900 font-bold text-lg">{user.name}</h3>
+                  <p className="text-slate-600 font-medium">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                  <div className={`inline-flex items-center space-x-2 mt-2 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${
+                    mqttConnected ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-red-100 text-red-700 border border-red-200'
                   }`}>
-                    <div className={`w-2 h-2 rounded-full ${mqttConnected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`}></div>
+                    <div className={`w-2 h-2 rounded-full animate-pulse ${mqttConnected ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
                     <span>{mqttConnected ? 'CONNECTED' : 'OFFLINE'}</span>
                   </div>
                 </div>
@@ -292,107 +287,107 @@ function App() {
 
            
             {/* View Selector */}
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
-              <h4 className="text-white font-bold mb-4 flex items-center">
-                <Map className="h-5 w-5 mr-3 text-cyan-400" />
+            <div className="bg-gradient-to-br from-white/70 to-slate-50/70 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-100">
+              <h4 className="text-slate-800 font-bold text-lg mb-6 flex items-center">
+                <Map className="h-6 w-6 mr-3 text-blue-600" />
                 Dashboard Views
               </h4>
               <div className="space-y-3">
                 {[
-                  { key: 'dashboard', label: 'Real-time Dashboard', icon: '📊' },
-                  { key: 'heatmap', label: 'Risk Heatmap', icon: '🔥' },
-                  { key: '3d', label: '3D Factory Model', icon: '🏭' },
-                  { key: 'chart', label: 'Analytics Charts', icon: '📈' }
+                  { key: 'dashboard', label: 'Real-time Dashboard', icon: '📊', color: 'from-blue-500 to-blue-600' },
+                  { key: 'heatmap', label: 'Risk Heatmap', icon: '🔥', color: 'from-red-500 to-red-600' },
+                  { key: '3d', label: '3D Factory Model', icon: '🏭', color: 'from-purple-500 to-purple-600' },
+                  { key: 'chart', label: 'Analytics Charts', icon: '📈', color: 'from-emerald-500 to-emerald-600' }
                 ].map((view) => (
                   <button
                     key={view.key}
                     onClick={() => setActiveView(view.key as any)}
-                    className={`w-full flex items-center space-x-3 p-4 rounded-2xl text-left font-semibold transition-all duration-300 ${
+                    className={`w-full flex items-center space-x-4 p-4 rounded-xl text-left font-bold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl ${
                       activeView === view.key
-                        ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-lg shadow-cyan-500/30 scale-105'
-                        : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'
+                        ? `bg-gradient-to-r ${view.color} text-white shadow-2xl scale-105 border-2 border-white/30`
+                        : 'bg-white/60 text-slate-700 hover:bg-white/80 hover:text-slate-900 border border-white/40'
                     }`}
                   >
-                    <span className="text-xl">{view.icon}</span>
-                    <span>{view.label}</span>
+                    <span className="text-2xl">{view.icon}</span>
+                    <span className="text-sm">{view.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* AI Assistant */}
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
-              <h4 className="text-white font-bold mb-4 flex items-center">
-                <Bot className="h-5 w-5 mr-3 text-purple-400" />
-                Gemini Flash 2.0
+            <div className="bg-gradient-to-br from-indigo-50/80 to-purple-50/80 backdrop-blur-sm border border-indigo-200/50 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-200">
+              <h4 className="text-slate-800 font-bold text-lg mb-6 flex items-center">
+                <Bot className="h-6 w-6 mr-3 text-indigo-600" />
+                Gemini Flash 2.0 AI
               </h4>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <button
                   onClick={() => { setAIPanelTab('voice'); setShowAIPanel(true); }}
-                  className="w-full flex items-center space-x-3 p-4 bg-blue-500/20 hover:bg-blue-500/30 rounded-2xl text-blue-300 hover:text-white transition-all duration-300 border border-blue-500/30"
+                  className="w-full flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl font-bold"
                 >
                   <Mic className="h-5 w-5" />
-                  <span className="font-semibold">Voice Commands</span>
+                  <span>Voice Commands</span>
                 </button>
                 <button
                   onClick={() => { setAIPanelTab('search'); setShowAIPanel(true); }}
-                  className="w-full flex items-center space-x-3 p-4 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-2xl text-emerald-300 hover:text-white transition-all duration-300 border border-emerald-500/30"
+                  className="w-full flex items-center space-x-4 p-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-xl text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl font-bold"
                 >
                   <Search className="h-5 w-5" />
-                  <span className="font-semibold">Smart Search</span>
+                  <span>Smart Search</span>
                 </button>
                 <button
                   onClick={() => { setAIPanelTab('chat'); setShowAIPanel(true); }}
-                  className="w-full flex items-center space-x-3 p-4 bg-purple-500/20 hover:bg-purple-500/30 rounded-2xl text-purple-300 hover:text-white transition-all duration-300 border border-purple-500/30"
+                  className="w-full flex items-center space-x-4 p-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl font-bold"
                 >
                   <Bot className="h-5 w-5" />
-                  <span className="font-semibold">AI Chat</span>
+                  <span>AI Chat Assistant</span>
                 </button>
               </div>
             </div>
 
             {/* Emergency Controls */}
             {(user.role === 'admin' || user.role === 'supervisor') && (
-              <div className="bg-red-500/10 backdrop-blur-sm border border-red-500/20 rounded-3xl p-6">
-                <h4 className="text-red-300 font-bold mb-4 flex items-center">
-                  <AlertTriangle className="h-5 w-5 mr-3" />
+              <div className="bg-gradient-to-br from-red-50/80 to-orange-50/80 backdrop-blur-sm border border-red-200/50 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-300">
+                <h4 className="text-red-700 font-bold text-lg mb-6 flex items-center">
+                  <AlertTriangle className="h-6 w-6 mr-3" />
                   Emergency Controls
                 </h4>
                 <button
                   onClick={() => setEmergencyMode(!emergencyMode)}
-                  className={`w-full p-4 rounded-2xl font-bold transition-all duration-300 ${
+                  className={`w-full p-5 rounded-xl font-black text-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl ${
                     emergencyMode 
-                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse shadow-lg shadow-red-500/30' 
-                      : 'bg-white/10 text-red-300 hover:bg-red-500/20 hover:text-white border border-red-500/30'
+                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse shadow-red-500/50 border-2 border-red-300' 
+                      : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-red-500 hover:to-red-600 shadow-orange-500/30'
                   }`}
                 >
-                  {emergencyMode ? '🚨 EMERGENCY ACTIVE' : 'Activate Emergency Mode'}
+                  {emergencyMode ? '🚨 EMERGENCY ACTIVE' : '🚨 Activate Emergency Mode'}
                 </button>
               </div>
             )}
 
             {/* Quick Actions */}
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
-              <h4 className="text-white font-bold mb-4 flex items-center">
-                <Settings className="h-5 w-5 mr-3 text-gray-400" />
+            <div className="bg-gradient-to-br from-white/70 to-slate-50/70 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-400">
+              <h4 className="text-slate-800 font-bold text-lg mb-6 flex items-center">
+                <Settings className="h-6 w-6 mr-3 text-slate-600" />
                 Quick Actions
               </h4>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <button 
                   onClick={handleExport}
-                  className="flex flex-col items-center p-4 bg-blue-500/20 hover:bg-blue-500/30 rounded-2xl text-blue-300 hover:text-white transition-all duration-300 hover:scale-105"
+                  className="flex flex-col items-center p-5 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl text-white transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl font-bold"
                 >
-                  <Download className="h-6 w-6 mb-2" />
-                  <span className="text-xs font-semibold">Export</span>
+                  <Download className="h-7 w-7 mb-2" />
+                  <span className="text-sm">Export</span>
                 </button>
                 <button 
                   onClick={handleShowAlerts}
-                  className="flex flex-col items-center p-4 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-2xl text-emerald-300 hover:text-white transition-all duration-300 hover:scale-105 relative"
+                  className="flex flex-col items-center p-5 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-xl text-white transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl font-bold relative"
                 >
-                  <Bell className="h-6 w-6 mb-2" />
-                  <span className="text-xs font-semibold">Alerts</span>
+                  <Bell className="h-7 w-7 mb-2" />
+                  <span className="text-sm">Alerts</span>
                   {alerts.length > 0 && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white">
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white animate-bounce shadow-lg">
                       {alerts.length}
                     </div>
                   )}
@@ -401,17 +396,17 @@ function App() {
                   <>
                     <button 
                       onClick={handleShowUsers}
-                      className="flex flex-col items-center p-4 bg-purple-500/20 hover:bg-purple-500/30 rounded-2xl text-purple-300 hover:text-white transition-all duration-300 hover:scale-105"
+                      className="flex flex-col items-center p-5 bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl text-white transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl font-bold"
                     >
-                      <Users className="h-6 w-6 mb-2" />
-                      <span className="text-xs font-semibold">Users</span>
+                      <Users className="h-7 w-7 mb-2" />
+                      <span className="text-sm">Users</span>
                     </button>
                     <button 
                       onClick={handleShowSettings}
-                      className="flex flex-col items-center p-4 bg-orange-500/20 hover:bg-orange-500/30 rounded-2xl text-orange-300 hover:text-white transition-all duration-300 hover:scale-105"
+                      className="flex flex-col items-center p-5 bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-xl text-white transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl font-bold"
                     >
-                      <Settings className="h-6 w-6 mb-2" />
-                      <span className="text-xs font-semibold">Settings</span>
+                      <Settings className="h-7 w-7 mb-2" />
+                      <span className="text-sm">Settings</span>
                     </button>
                   </>
                 )}
@@ -419,24 +414,24 @@ function App() {
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
-              <h4 className="text-white font-bold mb-4 flex items-center">
-                <Activity className="h-5 w-5 mr-3 text-cyan-400" />
-                Quick Stats - {activeFloor}
+            <div className="bg-gradient-to-br from-slate-50/80 to-blue-50/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-500">
+              <h4 className="text-slate-800 font-bold text-lg mb-6 flex items-center">
+                <Activity className="h-6 w-6 mr-3 text-blue-600" />
+                Live Stats - {activeFloor}
               </h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-emerald-500/20 rounded-2xl">
-                  <span className="text-emerald-300 font-semibold">Active Sensors</span>
-                  <span className="text-emerald-400 font-bold text-xl">{currentSensors.length}</span>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 rounded-xl border border-emerald-200/50 hover:scale-105 transition-all duration-300">
+                  <span className="text-emerald-700 font-bold">Active Sensors</span>
+                  <span className="text-emerald-800 font-black text-2xl">{currentSensors.length}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-red-500/20 rounded-2xl">
-                  <span className="text-red-300 font-semibold">Critical Alerts</span>
-                  <span className="text-red-400 font-bold text-xl">{currentSensors.filter(s => s.status === 'critical').length}</span>
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-red-500/20 to-red-600/20 rounded-xl border border-red-200/50 hover:scale-105 transition-all duration-300">
+                  <span className="text-red-700 font-bold">Critical Alerts</span>
+                  <span className="text-red-800 font-black text-2xl animate-pulse">{currentSensors.filter(s => s.status === 'critical').length}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-blue-500/20 rounded-2xl">
-                  <span className="text-blue-300 font-semibold">MQTT Status</span>
-                  <span className={`font-bold text-sm px-2 py-1 rounded-full ${
-                    mqttConnected ? 'bg-emerald-500/30 text-emerald-300' : 'bg-red-500/30 text-red-300'
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-xl border border-blue-200/50 hover:scale-105 transition-all duration-300">
+                  <span className="text-blue-700 font-bold">MQTT Status</span>
+                  <span className={`font-black text-sm px-3 py-2 rounded-lg shadow-sm ${
+                    mqttConnected ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white animate-pulse'
                   }`}>
                     {mqttConnected ? 'ONLINE' : 'OFFLINE'}
                   </span>
@@ -445,50 +440,50 @@ function App() {
             </div>
 
             {/* Emergency Contacts */}
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6">
-              <h4 className="text-white font-bold mb-4 flex items-center">
-                <Phone className="h-5 w-5 mr-3 text-green-400" />
+            <div className="bg-gradient-to-br from-green-50/80 to-emerald-50/80 backdrop-blur-sm border border-green-200/50 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-600">
+              <h4 className="text-green-800 font-bold text-lg mb-6 flex items-center">
+                <Phone className="h-6 w-6 mr-3 text-green-600" />
                 Emergency Contacts
               </h4>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <button 
                   onClick={() => {
                     const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 right-4 bg-red-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg z-50 animate-in slide-in-from-right-2 duration-300';
+                    notification.className = 'fixed top-4 right-4 bg-red-500/95 backdrop-blur-sm text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-in slide-in-from-right-2 duration-300 font-bold';
                     notification.innerHTML = '📞 Calling Fire Department...';
                     document.body.appendChild(notification);
                     setTimeout(() => notification.remove(), 3000);
                   }}
-                  className="w-full flex items-center justify-between p-3 bg-red-500/20 hover:bg-red-500/30 rounded-2xl transition-all duration-300 hover:scale-105"
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white font-bold"
                 >
-                  <span className="text-red-300 font-semibold">Fire Department</span>
-                  <span className="text-red-400 font-bold font-mono bg-red-500/30 px-3 py-1 rounded-full">911</span>
+                  <span>🚒 Fire Department</span>
+                  <span className="bg-white/20 px-3 py-2 rounded-lg font-mono text-lg">911</span>
                 </button>
                 <button 
                   onClick={() => {
                     const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 right-4 bg-yellow-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg z-50 animate-in slide-in-from-right-2 duration-300';
+                    notification.className = 'fixed top-4 right-4 bg-yellow-500/95 backdrop-blur-sm text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-in slide-in-from-right-2 duration-300 font-bold';
                     notification.innerHTML = '📞 Calling Security...';
                     document.body.appendChild(notification);
                     setTimeout(() => notification.remove(), 3000);
                   }}
-                  className="w-full flex items-center justify-between p-3 bg-yellow-500/20 hover:bg-yellow-500/30 rounded-2xl transition-all duration-300 hover:scale-105"
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white font-bold"
                 >
-                  <span className="text-yellow-300 font-semibold">Security</span>
-                  <span className="text-yellow-400 font-bold font-mono bg-yellow-500/30 px-3 py-1 rounded-full">5555</span>
+                  <span>🛡️ Security</span>
+                  <span className="bg-white/20 px-3 py-2 rounded-lg font-mono text-lg">5555</span>
                 </button>
                 <button 
                   onClick={() => {
                     const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 right-4 bg-emerald-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg z-50 animate-in slide-in-from-right-2 duration-300';
+                    notification.className = 'fixed top-4 right-4 bg-emerald-500/95 backdrop-blur-sm text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-in slide-in-from-right-2 duration-300 font-bold';
                     notification.innerHTML = '📞 Calling Medical Emergency...';
                     document.body.appendChild(notification);
                     setTimeout(() => notification.remove(), 3000);
                   }}
-                  className="w-full flex items-center justify-between p-3 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-2xl transition-all duration-300 hover:scale-105"
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white font-bold"
                 >
-                  <span className="text-emerald-300 font-semibold">Medical</span>
-                  <span className="text-emerald-400 font-bold font-mono bg-emerald-500/30 px-3 py-1 rounded-full">911</span>
+                  <span>🏥 Medical</span>
+                  <span className="bg-white/20 px-3 py-2 rounded-lg font-mono text-lg">911</span>
                 </button>
               </div>
             </div>
@@ -498,7 +493,7 @@ function App() {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Content Area */}
-          <div className="flex-1 overflow-auto p-6 relative z-10">
+          <div className="flex-1 overflow-auto p-8 relative z-10">
             {/* Emergency Banner */}
             {emergencyMode && (
               <div className="mb-6">
@@ -529,8 +524,11 @@ function App() {
             )}
             
             {activeView === 'chart' && currentData.length > 0 && (
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-                <h3 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Real-time Analytics - {activeFloor}</h3>
+              <div className="bg-white/90 backdrop-blur-xl border border-white/40 rounded-2xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom duration-700">
+                <h3 className="text-3xl font-black text-slate-800 mb-8 flex items-center">
+                  <Activity className="h-8 w-8 mr-4 text-blue-600" />
+                  Real-time Analytics - {activeFloor}
+                </h3>
                 <SensorChart data={currentData} />
               </div>
             )}
