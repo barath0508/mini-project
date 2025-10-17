@@ -38,18 +38,19 @@ export class MQTTService {
         // Skip connection messages
         if (messageStr.includes('connected')) return;
         
-        // Parse ESP32 message format: "Node1 | Normal Gas:1 Flame:0 Temp:29 Hum:51"
+        // Parse ESP32 message format: "Node1 | ✅ Normal | Gas:734 Flame:0 Temp:32.8 Hum:62.0"
         const parts = messageStr.split('|');
         console.log('Message parts:', parts);
-        if (parts.length >= 2) {
+        if (parts.length >= 3) {
           const nodeId = parts[0].trim();
-          const dataPart = parts[1].trim();
-          console.log('NodeID:', nodeId, 'DataPart:', dataPart);
+          const statusPart = parts[1].trim();
+          const dataPart = parts[2].trim();
+          console.log('NodeID:', nodeId, 'StatusPart:', statusPart, 'DataPart:', dataPart);
           
-          const gasMatch = dataPart.match(/Gas:(\d+)/);
-          const flameMatch = dataPart.match(/Flame:(\d+)/);
-          const tempMatch = dataPart.match(/Temp:(\d+)/);
-          const humMatch = dataPart.match(/Hum:(\d+)/);
+          const gasMatch = dataPart.match(/Gas:([\d.]+)/);
+          const flameMatch = dataPart.match(/Flame:([\d.]+)/);
+          const tempMatch = dataPart.match(/Temp:([\d.]+)/);
+          const humMatch = dataPart.match(/Hum:([\d.]+)/);
           
           if (gasMatch && flameMatch && tempMatch && humMatch) {
             // Map node to floor and zone
@@ -64,17 +65,17 @@ export class MQTTService {
               x: this.getZonePosition(zone).x,
               y: this.getZonePosition(zone).y,
               z: 20,
-              gas: parseInt(gasMatch[1]),
-              flame: parseInt(flameMatch[1]),
-              temperature: parseInt(tempMatch[1]),
-              humidity: parseInt(humMatch[1]),
-              prediction: dataPart.includes('Anomaly detected') ? 1 : 0,
+              gas: parseFloat(gasMatch[1]),
+              flame: parseFloat(flameMatch[1]),
+              temperature: parseFloat(tempMatch[1]),
+              humidity: parseFloat(humMatch[1]),
+              prediction: statusPart.includes('Anomaly') ? 1 : 0,
               timestamp: Date.now(),
               status: this.calculateStatus(
-                parseInt(gasMatch[1]),
-                parseInt(flameMatch[1]),
-                parseInt(tempMatch[1]),
-                parseInt(humMatch[1])
+                parseFloat(gasMatch[1]),
+                parseFloat(flameMatch[1]),
+                parseFloat(tempMatch[1]),
+                parseFloat(humMatch[1])
               )
             };
             
@@ -106,6 +107,7 @@ export class MQTTService {
             });
           } else {
             console.log('Failed to parse sensor values from:', dataPart);
+            console.log('Gas match:', gasMatch, 'Flame match:', flameMatch, 'Temp match:', tempMatch, 'Hum match:', humMatch);
           }
         }
       } catch (error) {

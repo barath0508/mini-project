@@ -173,39 +173,34 @@ function App() {
   })) : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 transition-all duration-500">
-      {/* Animated Background Pattern */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)] animate-pulse"></div>
-        <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(99,102,241,0.05)_25%,rgba(99,102,241,0.05)_50%,transparent_50%,transparent_75%,rgba(99,102,241,0.05)_75%)] bg-[length:60px_60px] animate-[slide_20s_linear_infinite]"></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
 
-      {/* Modern Header */}
-      <div className="bg-white/80 backdrop-blur-xl shadow-lg border-b border-white/20 relative z-10 animate-in slide-in-from-top duration-700">
+      {/* Header */}
+      <div className="glass-strong relative z-10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center py-5">
+          <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-6">
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
-                className="text-slate-600 hover:text-slate-900 p-3 rounded-xl hover:bg-white/60 transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                className="glass-button text-white/90 p-3 rounded-xl"
               >
                 {showSidebar ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                <Shield className="h-8 w-8 text-white" />
+              <div className="w-16 h-16 glass rounded-2xl flex items-center justify-center">
+                <Shield className="h-9 w-9 text-white" />
               </div>
-              <div className="animate-in fade-in slide-in-from-left duration-700 delay-200">
-                <h1 className="text-3xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <div>
+                <h1 className="text-4xl font-black text-white">
                   DHEEMA
                 </h1>
-                <p className="text-slate-500 text-sm font-medium tracking-wide">Detection Hub for Emergency Event Monitoring & Analysis</p>
+                <p className="glass-text text-base font-medium">Detection Hub for Emergency Event Monitoring & Analysis</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-6 animate-in fade-in slide-in-from-right duration-700 delay-300">
-              <div className="text-slate-600 text-sm bg-white/60 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/30">
-                Welcome, <span className="font-bold text-slate-900">{user.name}</span> 
-                <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs rounded-lg font-semibold">
+            <div className="flex items-center space-x-6">
+              <div className="glass text-white/90 px-5 py-3 rounded-xl">
+                Welcome, <span className="font-bold text-white">{user.name}</span> 
+                <span className="ml-3 px-3 py-1 glass text-white text-sm rounded-lg font-semibold">
                   {user.role.toUpperCase()}
                 </span>
               </div>
@@ -219,10 +214,10 @@ function App() {
               {(user.role === 'admin' || user.role === 'supervisor') && (
                 <button
                   onClick={() => setEmergencyMode(!emergencyMode)}
-                  className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl ${
+                  className={`px-6 py-3 rounded-xl font-bold glass-button ${
                     emergencyMode 
-                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse shadow-red-500/30' 
-                      : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white hover:from-orange-600 hover:to-amber-700 shadow-orange-500/30'
+                      ? 'bg-gradient-to-r from-red-500/80 to-red-600/80 text-white' 
+                      : 'bg-gradient-to-r from-orange-500/80 to-amber-600/80 text-white'
                   }`}
                 >
                   {emergencyMode ? '🚨 Emergency Active' : 'Activate Emergency'}
@@ -231,7 +226,7 @@ function App() {
               
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 px-5 py-3 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-white/30"
+                className="flex items-center space-x-2 px-5 py-3 glass-button text-white/90 rounded-xl"
               >
                 <LogOut size={20} />
                 <span className="font-semibold">Logout</span>
@@ -243,14 +238,14 @@ function App() {
 
       {/* Emergency Banner */}
       {emergencyMode && (
-        <div className="bg-gradient-to-r from-red-600 via-red-500 to-red-600 border-b border-red-700/50 animate-in slide-in-from-top duration-500 delay-100">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-center space-x-4 animate-pulse">
-              <AlertTriangle className="h-6 w-6 text-white animate-bounce" />
-              <span className="text-white font-bold text-lg tracking-wide">
+        <div className="glass bg-gradient-to-r from-red-500/30 to-red-500/30 border-b border-red-400/30">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-5">
+            <div className="flex items-center justify-center space-x-4">
+              <AlertTriangle className="h-7 w-7 text-red-300" />
+              <span className="text-white font-bold text-xl">
                 🚨 EMERGENCY MODE ACTIVE - FOLLOW EVACUATION PROCEDURES 🚨
               </span>
-              <AlertTriangle className="h-6 w-6 text-white animate-bounce" />
+              <AlertTriangle className="h-7 w-7 text-red-300" />
             </div>
           </div>
         </div>
@@ -258,27 +253,27 @@ function App() {
 
       {/* Main Layout */}
       <div className="flex h-screen">
-        {/* Modern Sidebar */}
-        <div className={`${showSidebar ? 'w-96' : 'w-0'} transition-all duration-500 ease-in-out overflow-hidden bg-white/90 backdrop-blur-xl border-r border-white/30 shadow-2xl`}>
-          <div className="p-8 space-y-8 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+        {/* Sidebar */}
+        <div className={`${showSidebar ? 'w-[26rem]' : 'w-0'} overflow-hidden glass-strong border-r border-white/20`}>
+          <div className="p-8 space-y-8 h-full overflow-y-auto">
             
             {/* User Profile Card */}
-            <div className="bg-gradient-to-br from-white/80 to-slate-50/80 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-left duration-700">
-              <div className="flex items-center space-x-4">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 ${
-                  user.role === 'admin' ? 'bg-gradient-to-br from-purple-600 to-purple-700' :
-                  user.role === 'supervisor' ? 'bg-gradient-to-br from-blue-600 to-blue-700' :
-                  'bg-gradient-to-br from-emerald-600 to-emerald-700'
+            <div className="glass rounded-3xl p-6">
+              <div className="flex items-center space-x-5">
+                <div className={`w-18 h-18 rounded-2xl flex items-center justify-center text-2xl font-black text-white ${
+                  user.role === 'admin' ? 'bg-gradient-to-br from-purple-500/80 to-purple-600/80' :
+                  user.role === 'supervisor' ? 'bg-gradient-to-br from-blue-500/80 to-blue-600/80' :
+                  'bg-gradient-to-br from-emerald-500/80 to-emerald-600/80'
                 }`}>
                   {user.name.charAt(0)}
                 </div>
                 <div>
-                  <h3 className="text-slate-900 font-bold text-lg">{user.name}</h3>
-                  <p className="text-slate-600 font-medium">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
-                  <div className={`inline-flex items-center space-x-2 mt-2 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${
-                    mqttConnected ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-red-100 text-red-700 border border-red-200'
+                  <h3 className="glass-text font-bold text-xl">{user.name}</h3>
+                  <p className="text-white/70 font-medium text-lg">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                  <div className={`inline-flex items-center space-x-2 mt-3 px-4 py-2 rounded-full text-sm font-bold glass-subtle ${
+                    mqttConnected ? 'text-emerald-300' : 'text-red-300'
                   }`}>
-                    <div className={`w-2 h-2 rounded-full animate-pulse ${mqttConnected ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+                    <div className={`w-3 h-3 rounded-full ${mqttConnected ? 'bg-emerald-400' : 'bg-red-400'}`}></div>
                     <span>{mqttConnected ? 'CONNECTED' : 'OFFLINE'}</span>
                   </div>
                 </div>
@@ -287,60 +282,60 @@ function App() {
 
            
             {/* View Selector */}
-            <div className="bg-gradient-to-br from-white/70 to-slate-50/70 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-100">
-              <h4 className="text-slate-800 font-bold text-lg mb-6 flex items-center">
-                <Map className="h-6 w-6 mr-3 text-blue-600" />
+            <div className="glass rounded-3xl p-6">
+              <h4 className="glass-text font-bold text-xl mb-6 flex items-center">
+                <Map className="h-7 w-7 mr-4 text-blue-300" />
                 Dashboard Views
               </h4>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {[
-                  { key: 'dashboard', label: 'Real-time Dashboard', icon: '📊', color: 'from-blue-500 to-blue-600' },
-                  { key: 'heatmap', label: 'Risk Heatmap', icon: '🔥', color: 'from-red-500 to-red-600' },
-                  { key: '3d', label: '3D Factory Model', icon: '🏭', color: 'from-purple-500 to-purple-600' },
-                  { key: 'chart', label: 'Analytics Charts', icon: '📈', color: 'from-emerald-500 to-emerald-600' }
+                  { key: 'dashboard', label: 'Real-time Dashboard', icon: '📊', color: 'from-blue-500/80 to-blue-600/80' },
+                  { key: 'heatmap', label: 'Risk Heatmap', icon: '🔥', color: 'from-red-500/80 to-red-600/80' },
+                  { key: '3d', label: '3D Factory Model', icon: '🏭', color: 'from-purple-500/80 to-purple-600/80' },
+                  { key: 'chart', label: 'Analytics Charts', icon: '📈', color: 'from-emerald-500/80 to-emerald-600/80' }
                 ].map((view) => (
                   <button
                     key={view.key}
                     onClick={() => setActiveView(view.key as any)}
-                    className={`w-full flex items-center space-x-4 p-4 rounded-xl text-left font-bold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl ${
+                    className={`w-full flex items-center space-x-5 p-5 rounded-2xl text-left font-bold ${
                       activeView === view.key
-                        ? `bg-gradient-to-r ${view.color} text-white shadow-2xl scale-105 border-2 border-white/30`
-                        : 'bg-white/60 text-slate-700 hover:bg-white/80 hover:text-slate-900 border border-white/40'
+                        ? `bg-gradient-to-r ${view.color} text-white`
+                        : 'glass-subtle text-white/80 hover:text-white'
                     }`}
                   >
-                    <span className="text-2xl">{view.icon}</span>
-                    <span className="text-sm">{view.label}</span>
+                    <span className="text-3xl">{view.icon}</span>
+                    <span className="text-base">{view.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* AI Assistant */}
-            <div className="bg-gradient-to-br from-indigo-50/80 to-purple-50/80 backdrop-blur-sm border border-indigo-200/50 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-200">
-              <h4 className="text-slate-800 font-bold text-lg mb-6 flex items-center">
-                <Bot className="h-6 w-6 mr-3 text-indigo-600" />
+            <div className="glass rounded-3xl p-6">
+              <h4 className="glass-text font-bold text-xl mb-6 flex items-center">
+                <Bot className="h-7 w-7 mr-4 text-purple-300" />
                 Gemini Flash 2.0 AI
               </h4>
               <div className="space-y-4">
                 <button
                   onClick={() => { setAIPanelTab('voice'); setShowAIPanel(true); }}
-                  className="w-full flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl font-bold"
+                  className="w-full flex items-center space-x-5 p-5 bg-gradient-to-r from-blue-500/80 to-blue-600/80 rounded-2xl text-white glass-button font-bold text-base"
                 >
-                  <Mic className="h-5 w-5" />
+                  <Mic className="h-6 w-6" />
                   <span>Voice Commands</span>
                 </button>
                 <button
                   onClick={() => { setAIPanelTab('search'); setShowAIPanel(true); }}
-                  className="w-full flex items-center space-x-4 p-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-xl text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl font-bold"
+                  className="w-full flex items-center space-x-5 p-5 bg-gradient-to-r from-emerald-500/80 to-emerald-600/80 rounded-2xl text-white glass-button font-bold text-base"
                 >
-                  <Search className="h-5 w-5" />
+                  <Search className="h-6 w-6" />
                   <span>Smart Search</span>
                 </button>
                 <button
                   onClick={() => { setAIPanelTab('chat'); setShowAIPanel(true); }}
-                  className="w-full flex items-center space-x-4 p-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl font-bold"
+                  className="w-full flex items-center space-x-5 p-5 bg-gradient-to-r from-purple-500/80 to-purple-600/80 rounded-2xl text-white glass-button font-bold text-base"
                 >
-                  <Bot className="h-5 w-5" />
+                  <Bot className="h-6 w-6" />
                   <span>AI Chat Assistant</span>
                 </button>
               </div>
@@ -348,17 +343,17 @@ function App() {
 
             {/* Emergency Controls */}
             {(user.role === 'admin' || user.role === 'supervisor') && (
-              <div className="bg-gradient-to-br from-red-50/80 to-orange-50/80 backdrop-blur-sm border border-red-200/50 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-300">
-                <h4 className="text-red-700 font-bold text-lg mb-6 flex items-center">
-                  <AlertTriangle className="h-6 w-6 mr-3" />
+              <div className="glass rounded-3xl p-6">
+                <h4 className="text-red-300 font-bold text-xl mb-6 flex items-center">
+                  <AlertTriangle className="h-7 w-7 mr-4" />
                   Emergency Controls
                 </h4>
                 <button
                   onClick={() => setEmergencyMode(!emergencyMode)}
-                  className={`w-full p-5 rounded-xl font-black text-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl ${
+                  className={`w-full p-6 rounded-2xl font-black text-xl glass-button ${
                     emergencyMode 
-                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse shadow-red-500/50 border-2 border-red-300' 
-                      : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-red-500 hover:to-red-600 shadow-orange-500/30'
+                      ? 'bg-gradient-to-r from-red-500/80 to-red-600/80 text-white' 
+                      : 'bg-gradient-to-r from-orange-500/80 to-red-500/80 text-white'
                   }`}
                 >
                   {emergencyMode ? '🚨 EMERGENCY ACTIVE' : '🚨 Activate Emergency Mode'}
@@ -367,27 +362,27 @@ function App() {
             )}
 
             {/* Quick Actions */}
-            <div className="bg-gradient-to-br from-white/70 to-slate-50/70 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-400">
-              <h4 className="text-slate-800 font-bold text-lg mb-6 flex items-center">
-                <Settings className="h-6 w-6 mr-3 text-slate-600" />
+            <div className="glass rounded-3xl p-6">
+              <h4 className="glass-text font-bold text-xl mb-6 flex items-center">
+                <Settings className="h-7 w-7 mr-4 text-blue-300" />
                 Quick Actions
               </h4>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-5">
                 <button 
                   onClick={handleExport}
-                  className="flex flex-col items-center p-5 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl text-white transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl font-bold"
+                  className="flex flex-col items-center p-6 bg-gradient-to-br from-blue-500/80 to-blue-600/80 rounded-2xl text-white glass-button font-bold"
                 >
-                  <Download className="h-7 w-7 mb-2" />
-                  <span className="text-sm">Export</span>
+                  <Download className="h-8 w-8 mb-3" />
+                  <span className="text-base">Export</span>
                 </button>
                 <button 
                   onClick={handleShowAlerts}
-                  className="flex flex-col items-center p-5 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-xl text-white transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl font-bold relative"
+                  className="flex flex-col items-center p-6 bg-gradient-to-br from-emerald-500/80 to-emerald-600/80 rounded-2xl text-white glass-button font-bold relative"
                 >
-                  <Bell className="h-7 w-7 mb-2" />
-                  <span className="text-sm">Alerts</span>
+                  <Bell className="h-8 w-8 mb-3" />
+                  <span className="text-base">Alerts</span>
                   {alerts.length > 0 && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white animate-bounce shadow-lg">
+                    <div className="absolute -top-2 -right-2 w-7 h-7 bg-red-500/90 rounded-full flex items-center justify-center text-sm font-bold text-white">
                       {alerts.length}
                     </div>
                   )}
@@ -396,42 +391,42 @@ function App() {
                   <>
                     <button 
                       onClick={handleShowUsers}
-                      className="flex flex-col items-center p-5 bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl text-white transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl font-bold"
+                      className="flex flex-col items-center p-6 bg-gradient-to-br from-purple-500/80 to-purple-600/80 rounded-2xl text-white glass-button font-bold"
                     >
-                      <Users className="h-7 w-7 mb-2" />
-                      <span className="text-sm">Users</span>
+                      <Users className="h-8 w-8 mb-3" />
+                      <span className="text-base">Users</span>
                     </button>
                     <button 
                       onClick={handleShowSettings}
-                      className="flex flex-col items-center p-5 bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-xl text-white transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl font-bold"
+                      className="flex flex-col items-center p-6 bg-gradient-to-br from-orange-500/80 to-orange-600/80 rounded-2xl text-white glass-button font-bold"
                     >
-                      <Settings className="h-7 w-7 mb-2" />
-                      <span className="text-sm">Settings</span>
+                      <Settings className="h-8 w-8 mb-3" />
+                      <span className="text-base">Settings</span>
                     </button>
                   </>
                 )}
               </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="bg-gradient-to-br from-slate-50/80 to-blue-50/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-500">
-              <h4 className="text-slate-800 font-bold text-lg mb-6 flex items-center">
-                <Activity className="h-6 w-6 mr-3 text-blue-600" />
+            {/* Live Stats */}
+            <div className="glass rounded-3xl p-6">
+              <h4 className="glass-text font-bold text-xl mb-6 flex items-center">
+                <Activity className="h-7 w-7 mr-4 text-cyan-300" />
                 Live Stats - {activeFloor}
               </h4>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 rounded-xl border border-emerald-200/50 hover:scale-105 transition-all duration-300">
-                  <span className="text-emerald-700 font-bold">Active Sensors</span>
-                  <span className="text-emerald-800 font-black text-2xl">{currentSensors.length}</span>
+              <div className="space-y-5">
+                <div className="flex items-center justify-between p-5 glass-subtle rounded-2xl">
+                  <span className="text-emerald-300 font-bold text-lg">Active Sensors</span>
+                  <span className="text-emerald-200 font-black text-3xl">{currentSensors.length}</span>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-red-500/20 to-red-600/20 rounded-xl border border-red-200/50 hover:scale-105 transition-all duration-300">
-                  <span className="text-red-700 font-bold">Critical Alerts</span>
-                  <span className="text-red-800 font-black text-2xl animate-pulse">{currentSensors.filter(s => s.status === 'critical').length}</span>
+                <div className="flex items-center justify-between p-5 glass-subtle rounded-2xl">
+                  <span className="text-red-300 font-bold text-lg">Critical Alerts</span>
+                  <span className="text-red-200 font-black text-3xl">{currentSensors.filter(s => s.status === 'critical').length}</span>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-xl border border-blue-200/50 hover:scale-105 transition-all duration-300">
-                  <span className="text-blue-700 font-bold">MQTT Status</span>
-                  <span className={`font-black text-sm px-3 py-2 rounded-lg shadow-sm ${
-                    mqttConnected ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white animate-pulse'
+                <div className="flex items-center justify-between p-5 glass-subtle rounded-2xl">
+                  <span className="text-blue-300 font-bold text-lg">MQTT Status</span>
+                  <span className={`font-black text-base px-4 py-2 rounded-xl glass-button ${
+                    mqttConnected ? 'bg-emerald-500/80 text-white' : 'bg-red-500/80 text-white'
                   }`}>
                     {mqttConnected ? 'ONLINE' : 'OFFLINE'}
                   </span>
@@ -440,50 +435,50 @@ function App() {
             </div>
 
             {/* Emergency Contacts */}
-            <div className="bg-gradient-to-br from-green-50/80 to-emerald-50/80 backdrop-blur-sm border border-green-200/50 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-600">
-              <h4 className="text-green-800 font-bold text-lg mb-6 flex items-center">
-                <Phone className="h-6 w-6 mr-3 text-green-600" />
+            <div className="glass rounded-3xl p-6">
+              <h4 className="text-green-300 font-bold text-xl mb-6 flex items-center">
+                <Phone className="h-7 w-7 mr-4 text-green-400" />
                 Emergency Contacts
               </h4>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <button 
                   onClick={() => {
                     const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 right-4 bg-red-500/95 backdrop-blur-sm text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-in slide-in-from-right-2 duration-300 font-bold';
+                    notification.className = 'fixed top-4 right-4 glass-strong text-white px-8 py-5 rounded-3xl shadow-2xl z-50 font-bold text-lg';
                     notification.innerHTML = '📞 Calling Fire Department...';
                     document.body.appendChild(notification);
                     setTimeout(() => notification.remove(), 3000);
                   }}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white font-bold"
+                  className="w-full flex items-center justify-between p-5 bg-gradient-to-r from-red-500/80 to-red-600/80 rounded-2xl glass-button text-white font-bold text-lg"
                 >
                   <span>🚒 Fire Department</span>
-                  <span className="bg-white/20 px-3 py-2 rounded-lg font-mono text-lg">911</span>
+                  <span className="glass-subtle px-4 py-2 rounded-xl font-mono text-xl">911</span>
                 </button>
                 <button 
                   onClick={() => {
                     const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 right-4 bg-yellow-500/95 backdrop-blur-sm text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-in slide-in-from-right-2 duration-300 font-bold';
+                    notification.className = 'fixed top-4 right-4 glass-strong text-white px-8 py-5 rounded-3xl shadow-2xl z-50 font-bold text-lg';
                     notification.innerHTML = '📞 Calling Security...';
                     document.body.appendChild(notification);
                     setTimeout(() => notification.remove(), 3000);
                   }}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white font-bold"
+                  className="w-full flex items-center justify-between p-5 bg-gradient-to-r from-yellow-500/80 to-yellow-600/80 rounded-2xl glass-button text-white font-bold text-lg"
                 >
                   <span>🛡️ Security</span>
-                  <span className="bg-white/20 px-3 py-2 rounded-lg font-mono text-lg">5555</span>
+                  <span className="glass-subtle px-4 py-2 rounded-xl font-mono text-xl">5555</span>
                 </button>
                 <button 
                   onClick={() => {
                     const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 right-4 bg-emerald-500/95 backdrop-blur-sm text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-in slide-in-from-right-2 duration-300 font-bold';
+                    notification.className = 'fixed top-4 right-4 glass-strong text-white px-8 py-5 rounded-3xl shadow-2xl z-50 font-bold text-lg';
                     notification.innerHTML = '📞 Calling Medical Emergency...';
                     document.body.appendChild(notification);
                     setTimeout(() => notification.remove(), 3000);
                   }}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white font-bold"
+                  className="w-full flex items-center justify-between p-5 bg-gradient-to-r from-emerald-500/80 to-emerald-600/80 rounded-2xl glass-button text-white font-bold text-lg"
                 >
                   <span>🏥 Medical</span>
-                  <span className="bg-white/20 px-3 py-2 rounded-lg font-mono text-lg">911</span>
+                  <span className="glass-subtle px-4 py-2 rounded-xl font-mono text-xl">911</span>
                 </button>
               </div>
             </div>
@@ -524,9 +519,9 @@ function App() {
             )}
             
             {activeView === 'chart' && currentData.length > 0 && (
-              <div className="bg-white/90 backdrop-blur-xl border border-white/40 rounded-2xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom duration-700">
-                <h3 className="text-3xl font-black text-slate-800 mb-8 flex items-center">
-                  <Activity className="h-8 w-8 mr-4 text-blue-600" />
+              <div className="glass-strong rounded-3xl p-10">
+                <h3 className="text-4xl font-black glass-text mb-10 flex items-center">
+                  <Activity className="h-10 w-10 mr-5 text-blue-300" />
                   Real-time Analytics - {activeFloor}
                 </h3>
                 <SensorChart data={currentData} />

@@ -50,75 +50,73 @@ export default function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center relative overflow-hidden">
-      {/* Professional Background Pattern */}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center relative overflow-hidden">
+      {/* Glassmorphic Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_50%)] animate-pulse"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl glass-float"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-pink-400/20 to-indigo-400/20 rounded-full blur-3xl glass-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-cyan-400/15 to-blue-400/15 rounded-full blur-2xl glass-float" style={{animationDelay: '4s'}}></div>
       </div>
       
-      <div className="bg-white/90 backdrop-blur-xl p-12 rounded-3xl shadow-2xl w-[480px] border border-white/40 relative animate-in fade-in slide-in-from-bottom duration-700">
-        {/* Professional Glow Effect */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 rounded-3xl blur-xl opacity-60"></div>
+      <div className="glass-strong p-16 rounded-3xl w-[600px] relative animate-in fade-in slide-in-from-bottom duration-700 glass-glow">
         <div className="relative">
-          <div className="text-center mb-12 animate-in fade-in slide-in-from-top duration-700 delay-200">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl shadow-blue-500/30 hover:scale-110 transition-all duration-300">
-              <span className="text-4xl font-bold text-white">🏭</span>
+          <div className="text-center mb-16 animate-in fade-in slide-in-from-top duration-700 delay-200">
+            <div className="w-28 h-28 glass-gradient-blue rounded-3xl mx-auto mb-10 flex items-center justify-center glass-glow hover:scale-110 transition-all duration-300">
+              <span className="text-5xl font-bold text-white">🏭</span>
             </div>
-            <h1 className="text-4xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
+            <h1 className="text-5xl font-black bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-6">
               DHEEMA
             </h1>
-            <p className="text-slate-600 text-lg font-semibold tracking-wide">Detection Hub for Emergency Event Monitoring & Analysis</p>
-            <div className="w-20 h-1 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-full mx-auto mt-6"></div>
+            <p className="glass-text text-xl font-semibold tracking-wide">Detection Hub for Emergency Event Monitoring & Analysis</p>
+            <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mx-auto mt-8 glass-glow"></div>
           </div>
           
-          <form onSubmit={handleLogin} className="space-y-8 animate-in fade-in slide-in-from-bottom duration-700 delay-300">
-            <div className="space-y-3">
-              <label className="block text-slate-700 mb-3 font-bold text-sm uppercase tracking-wide">Username</label>
+          <form onSubmit={handleLogin} className="space-y-10 animate-in fade-in slide-in-from-bottom duration-700 delay-300">
+            <div className="space-y-4">
+              <label className="block glass-text mb-4 font-bold text-lg uppercase tracking-wide">Username</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full p-5 bg-white/70 text-slate-800 rounded-2xl border border-white/40 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 backdrop-blur-sm placeholder-slate-500 font-semibold shadow-lg hover:shadow-xl focus:scale-[1.02]"
+                className="w-full p-6 glass text-white rounded-2xl placeholder-white/60 font-semibold text-lg hover:scale-[1.02] transition-all duration-300"
                 placeholder="Enter your username"
               />
             </div>
-            <div className="space-y-3">
-              <label className="block text-slate-700 mb-3 font-bold text-sm uppercase tracking-wide">Password</label>
+            <div className="space-y-4">
+              <label className="block glass-text mb-4 font-bold text-lg uppercase tracking-wide">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-5 bg-white/70 text-slate-800 rounded-2xl border border-white/40 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 backdrop-blur-sm placeholder-slate-500 font-semibold shadow-lg hover:shadow-xl focus:scale-[1.02]"
+                className="w-full p-6 glass text-white rounded-2xl placeholder-white/60 font-semibold text-lg hover:scale-[1.02] transition-all duration-300"
                 placeholder="Enter your password"
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white p-5 rounded-2xl font-black text-lg transition-all duration-300 shadow-2xl hover:shadow-blue-500/40 transform hover:scale-[1.02] hover:-translate-y-1 btn-professional"
+              className="w-full bg-gradient-to-r from-blue-500/80 to-indigo-600/80 hover:from-blue-600/80 hover:to-indigo-700/80 text-white p-6 rounded-2xl font-black text-xl transition-all duration-300 glass-button hover:scale-105 hover:-translate-y-1 glass-shimmer"
             >
               🚀 Access System
             </button>
           </form>
           
-          <div className="mt-10 p-6 bg-white/60 rounded-2xl border border-white/40 backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-bottom duration-700 delay-500">
-            <div className="text-slate-700 text-sm font-black mb-6 flex items-center">
-              <div className="w-3 h-3 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-full mr-3 animate-pulse"></div>
+          <div className="mt-12 glass rounded-3xl p-8 animate-in fade-in slide-in-from-bottom duration-700 delay-500">
+            <div className="glass-text text-lg font-black mb-8 flex items-center">
+              <div className="w-4 h-4 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mr-4 animate-pulse glass-glow"></div>
               Demo Credentials
             </div>
-            <div className="space-y-4 text-sm">
-              <div className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border border-purple-200/50 hover:scale-105 transition-all duration-300 shadow-md">
-                <span className="text-purple-700 font-black font-mono text-base">admin/password</span>
-                <span className="text-purple-600 text-xs bg-purple-200 px-3 py-1 rounded-full font-bold">Full Access</span>
+            <div className="space-y-5 text-base">
+              <div className="flex justify-between items-center p-5 glass-subtle rounded-2xl hover:scale-105 transition-all duration-300 glass-hover">
+                <span className="text-purple-300 font-black font-mono text-lg">admin/password</span>
+                <span className="text-purple-200 text-sm glass-subtle px-4 py-2 rounded-xl font-bold">Full Access</span>
               </div>
-              <div className="flex justify-between items-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200/50 hover:scale-105 transition-all duration-300 shadow-md">
-                <span className="text-blue-700 font-black font-mono text-base">supervisor/password</span>
-                <span className="text-blue-600 text-xs bg-blue-200 px-3 py-1 rounded-full font-bold">Zone Access</span>
+              <div className="flex justify-between items-center p-5 glass-subtle rounded-2xl hover:scale-105 transition-all duration-300 glass-hover">
+                <span className="text-blue-300 font-black font-mono text-lg">supervisor/password</span>
+                <span className="text-blue-200 text-sm glass-subtle px-4 py-2 rounded-xl font-bold">Zone Access</span>
               </div>
-              <div className="flex justify-between items-center p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200/50 hover:scale-105 transition-all duration-300 shadow-md">
-                <span className="text-emerald-700 font-black font-mono text-base">worker/password</span>
-                <span className="text-emerald-600 text-xs bg-emerald-200 px-3 py-1 rounded-full font-bold">Limited Access</span>
+              <div className="flex justify-between items-center p-5 glass-subtle rounded-2xl hover:scale-105 transition-all duration-300 glass-hover">
+                <span className="text-emerald-300 font-black font-mono text-lg">worker/password</span>
+                <span className="text-emerald-200 text-sm glass-subtle px-4 py-2 rounded-xl font-bold">Limited Access</span>
               </div>
             </div>
           </div>

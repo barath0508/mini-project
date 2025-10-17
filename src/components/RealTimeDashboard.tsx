@@ -27,185 +27,185 @@ export default function RealTimeDashboard({ user, sensors, activeFloor, emergenc
   const avgHumidity = floorSensors.length > 0 ? Math.round(floorSensors.reduce((sum, s) => sum + s.humidity, 0) / floorSensors.length) : 0;
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom duration-700">
-      {/* Professional Status Bar */}
-      <div className="bg-white/90 backdrop-blur-xl border border-white/40 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-2xl"></div>
+    <div className="space-y-8">
+      {/* Glassmorphic Status Bar */}
+      <div className="glass-strong rounded-3xl p-6 relative overflow-hidden animate-in fade-in slide-in-from-top duration-700">
         <div className="flex items-center justify-between relative z-10">
           <div className="flex items-center space-x-8">
             <div className="flex items-center space-x-3">
-              <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
-              <Wifi className="h-6 w-6 text-emerald-600" />
-              <span className="text-emerald-700 font-black tracking-wide text-lg">LIVE</span>
+              <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse glass-glow"></div>
+              <Wifi className="h-6 w-6 text-green-300" />
+              <span className="text-green-300 font-bold tracking-wide text-xl">LIVE</span>
             </div>
             <div className="flex items-center space-x-3">
-              <Clock className="h-5 w-5 text-slate-600" />
-              <span className="text-slate-800 font-mono text-xl font-bold">{currentTime.toLocaleTimeString()}</span>
+              <Clock className="h-6 w-6 text-blue-300" />
+              <span className="glass-text font-mono text-xl font-bold">{currentTime.toLocaleTimeString()}</span>
             </div>
             <div className="flex items-center space-x-3">
-              <Users className="h-5 w-5 text-blue-600" />
-              <span className="text-slate-800 font-bold">{user.name}</span>
+              <Users className="h-6 w-6 text-purple-300" />
+              <span className="glass-text font-bold text-xl">{user.name}</span>
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <div className={`px-6 py-3 rounded-xl text-sm font-black shadow-xl hover:scale-105 transition-all duration-300 ${
+            <div className={`px-6 py-3 rounded-2xl text-lg font-bold glass-button transition-all duration-300 ${
               emergencyMode 
-                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse shadow-red-500/40' 
-                : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-500/40'
+                ? 'bg-gradient-to-r from-red-500/80 to-red-600/80 text-white animate-pulse glass-glow' 
+                : 'bg-gradient-to-r from-green-500/80 to-emerald-600/80 text-white'
             }`}>
-              {emergencyMode ? '🚨 EMERGENCY MODE' : '✅ SYSTEM NORMAL'}
+              {emergencyMode ? '🚨 EMERGENCY' : '✅ NORMAL'}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Professional Metrics Grid */}
+      {/* Glassmorphic Metrics Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-6">
-        <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200/50 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-100">
+        <div className="glass rounded-3xl p-6 glass-hover transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-100">
           <div className="flex items-center justify-between">
-            <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <AlertTriangle className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 bg-gradient-to-br from-red-500/30 to-red-600/30 rounded-2xl flex items-center justify-center glass-glow">
+              <AlertTriangle className="h-9 w-9 text-red-300" />
             </div>
             <div className="text-right">
-              <div className="text-4xl font-black text-red-700">{criticalCount}</div>
-              <div className="text-red-600 text-sm font-bold">Critical</div>
+              <div className="text-4xl font-black text-red-200">{criticalCount}</div>
+              <div className="text-red-300 text-lg font-bold">Critical</div>
             </div>
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200/50 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-200">
+        <div className="glass rounded-3xl p-6 glass-hover transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-200">
           <div className="flex items-center justify-between">
-            <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <AlertTriangle className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-500/30 to-amber-600/30 rounded-2xl flex items-center justify-center glass-glow">
+              <AlertTriangle className="h-9 w-9 text-amber-300" />
             </div>
             <div className="text-right">
-              <div className="text-4xl font-black text-amber-700">{warningCount}</div>
-              <div className="text-amber-600 text-sm font-bold">Warning</div>
+              <div className="text-4xl font-black text-amber-200">{warningCount}</div>
+              <div className="text-amber-300 text-lg font-bold">Warning</div>
             </div>
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200/50 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-300">
+        <div className="glass rounded-3xl p-6 glass-hover transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-300">
           <div className="flex items-center justify-between">
-            <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Activity className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 bg-gradient-to-br from-emerald-500/30 to-emerald-600/30 rounded-2xl flex items-center justify-center glass-glow">
+              <Activity className="h-9 w-9 text-emerald-300" />
             </div>
             <div className="text-right">
-              <div className="text-4xl font-black text-emerald-700">{normalCount}</div>
-              <div className="text-emerald-600 text-sm font-bold">Normal</div>
+              <div className="text-4xl font-black text-emerald-200">{normalCount}</div>
+              <div className="text-emerald-300 text-lg font-bold">Normal</div>
             </div>
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200/50 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-400">
+        <div className="glass rounded-3xl p-6 glass-hover transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-400">
           <div className="flex items-center justify-between">
-            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Wind className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-2xl flex items-center justify-center glass-glow">
+              <Wind className="h-9 w-9 text-blue-300" />
             </div>
             <div className="text-right">
-              <div className="text-4xl font-black text-blue-700">{avgGas}</div>
-              <div className="text-blue-600 text-sm font-bold">Avg Gas</div>
+              <div className="text-4xl font-black text-blue-200">{avgGas}</div>
+              <div className="text-blue-300 text-lg font-bold">Avg Gas</div>
             </div>
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200/50 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-500">
+        <div className="glass rounded-3xl p-6 glass-hover transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-500">
           <div className="flex items-center justify-between">
-            <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Thermometer className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 bg-gradient-to-br from-orange-500/30 to-orange-600/30 rounded-2xl flex items-center justify-center glass-glow">
+              <Thermometer className="h-9 w-9 text-orange-300" />
             </div>
             <div className="text-right">
-              <div className="text-4xl font-black text-orange-700">{avgTemp}°C</div>
-              <div className="text-orange-600 text-sm font-bold">Avg Temp</div>
+              <div className="text-4xl font-black text-orange-200">{avgTemp}°C</div>
+              <div className="text-orange-300 text-lg font-bold">Avg Temp</div>
             </div>
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 border border-cyan-200/50 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-600">
+        <div className="glass rounded-3xl p-6 glass-hover transition-all duration-300 animate-in fade-in slide-in-from-left duration-700 delay-600">
           <div className="flex items-center justify-between">
-            <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Droplets className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/30 to-cyan-600/30 rounded-2xl flex items-center justify-center glass-glow">
+              <Droplets className="h-9 w-9 text-cyan-300" />
             </div>
             <div className="text-right">
-              <div className="text-4xl font-black text-cyan-700">{avgHumidity}%</div>
-              <div className="text-cyan-600 text-sm font-bold">Avg Humidity</div>
+              <div className="text-4xl font-black text-cyan-200">{avgHumidity}%</div>
+              <div className="text-cyan-300 text-lg font-bold">Avg Humidity</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Professional Sensor Grid */}
-      <div className="bg-white/90 backdrop-blur-xl border border-white/40 rounded-2xl p-8 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom duration-700 delay-300">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50/30 to-blue-50/30 rounded-2xl"></div>
-        <h3 className="text-slate-800 font-black text-2xl mb-8 flex items-center relative z-10">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+      {/* Glassmorphic Sensor Grid */}
+      <div className="glass-strong rounded-3xl p-8 relative overflow-hidden animate-in fade-in slide-in-from-bottom duration-700 delay-300">
+        <h3 className="glass-text font-black text-3xl mb-8 flex items-center relative z-10">
+          <div className="w-12 h-12 glass-gradient-blue rounded-2xl flex items-center justify-center mr-5 glass-glow">
             <Zap className="h-7 w-7 text-white" />
           </div>
-          <span>Live Sensors - {activeFloor}</span>
+          <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+            Live Sensors - {activeFloor}
+          </span>
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
           {floorSensors.map((sensor, index) => (
-            <div key={sensor.id} className={`border rounded-2xl p-6 transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-2xl animate-in fade-in slide-in-from-bottom duration-700 ${
+            <div key={sensor.id} className={`glass rounded-3xl p-6 transition-all duration-300 glass-hover animate-in fade-in slide-in-from-bottom duration-700 ${
               sensor.status === 'critical' 
-                ? 'bg-gradient-to-br from-red-50 to-red-100 border-red-200/50 shadow-red-500/20' :
+                ? 'glass-glow border-red-400/30' :
               sensor.status === 'warning' 
-                ? 'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200/50 shadow-amber-500/20' :
-                'bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200/50 shadow-slate-500/20'
+                ? 'glass-glow border-amber-400/30' :
+                'border-emerald-400/30'
             }`} style={{ animationDelay: `${index * 100}ms` }}>
               <div className="flex items-center justify-between mb-6">
-                <span className="text-slate-800 font-black text-xl">{sensor.nodeId}</span>
-                <div className={`w-5 h-5 rounded-full animate-pulse shadow-lg ${
-                  sensor.status === 'critical' ? 'bg-red-500 shadow-red-500/50' :
-                  sensor.status === 'warning' ? 'bg-amber-500 shadow-amber-500/50' : 'bg-emerald-500 shadow-emerald-500/50'
+                <span className="glass-text font-black text-xl">{sensor.nodeId}</span>
+                <div className={`w-5 h-5 rounded-full animate-pulse glass-glow ${
+                  sensor.status === 'critical' ? 'bg-red-400' :
+                  sensor.status === 'warning' ? 'bg-amber-400' : 'bg-emerald-400'
                 }`}></div>
               </div>
               
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-white/70 rounded-xl border border-white/40 shadow-sm">
+                <div className="flex items-center justify-between p-4 glass-subtle rounded-2xl">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
-                      <Wind className="h-5 w-5 text-white" />
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-xl flex items-center justify-center">
+                      <Wind className="h-5 w-5 text-blue-300" />
                     </div>
-                    <span className="text-slate-700 font-bold">Gas</span>
+                    <span className="glass-text font-bold">Gas</span>
                   </div>
-                  <span className="text-blue-700 font-black font-mono text-lg">{Math.round(sensor.gas)}ppm</span>
+                  <span className="text-blue-200 font-black font-mono text-lg">{Math.round(sensor.gas)}ppm</span>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-white/70 rounded-xl border border-white/40 shadow-sm">
+                <div className="flex items-center justify-between p-4 glass-subtle rounded-2xl">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
-                      <Thermometer className="h-5 w-5 text-white" />
+                    <div className="w-8 h-8 bg-gradient-to-br from-orange-500/30 to-orange-600/30 rounded-xl flex items-center justify-center">
+                      <Thermometer className="h-5 w-5 text-orange-300" />
                     </div>
-                    <span className="text-slate-700 font-bold">Temp</span>
+                    <span className="glass-text font-bold">Temp</span>
                   </div>
-                  <span className="text-orange-700 font-black font-mono text-lg">{Math.round(sensor.temperature)}°C</span>
+                  <span className="text-orange-200 font-black font-mono text-lg">{Math.round(sensor.temperature)}°C</span>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-white/70 rounded-xl border border-white/40 shadow-sm">
+                <div className="flex items-center justify-between p-4 glass-subtle rounded-2xl">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-md">
-                      <Droplets className="h-5 w-5 text-white" />
+                    <div className="w-8 h-8 bg-gradient-to-br from-cyan-500/30 to-cyan-600/30 rounded-xl flex items-center justify-center">
+                      <Droplets className="h-5 w-5 text-cyan-300" />
                     </div>
-                    <span className="text-slate-700 font-bold">Humidity</span>
+                    <span className="glass-text font-bold">Humidity</span>
                   </div>
-                  <span className="text-cyan-700 font-black font-mono text-lg">{Math.round(sensor.humidity)}%</span>
+                  <span className="text-cyan-200 font-black font-mono text-lg">{Math.round(sensor.humidity)}%</span>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-white/70 rounded-xl border border-white/40 shadow-sm">
+                <div className="flex items-center justify-between p-4 glass-subtle rounded-2xl">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-md">
-                      <Flame className="h-5 w-5 text-white" />
+                    <div className="w-8 h-8 bg-gradient-to-br from-red-500/30 to-red-600/30 rounded-xl flex items-center justify-center">
+                      <Flame className="h-5 w-5 text-red-300" />
                     </div>
-                    <span className="text-slate-700 font-bold">Flame</span>
+                    <span className="glass-text font-bold">Flame</span>
                   </div>
-                  <span className="text-red-700 font-black font-mono text-lg">{sensor.flame}</span>
+                  <span className="text-red-200 font-black font-mono text-lg">{sensor.flame}</span>
                 </div>
               </div>
               
-              <div className="mt-6 pt-4 border-t border-slate-200/50 text-sm text-slate-600">
-                <div className="flex justify-between font-semibold">
-                  <span>Zone: <span className="text-blue-600 font-bold">{sensor.zone}</span></span>
-                  <span className="text-slate-500">{new Date(sensor.timestamp).toLocaleTimeString()}</span>
+              <div className="mt-6 pt-4 border-t border-white/10 text-sm">
+                <div className="flex justify-between glass-text">
+                  <span>Zone: <span className="text-cyan-300 font-bold">{sensor.zone}</span></span>
+                  <span className="text-white/60">{new Date(sensor.timestamp).toLocaleTimeString()}</span>
                 </div>
               </div>
             </div>
